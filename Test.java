@@ -4,4 +4,9 @@ public class Test {
         System.out.println("Hello ashez from habiba");
 
     }
+
+    public int sum (int x){
+       return x
+
+    }
 }
