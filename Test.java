@@ -6,6 +6,7 @@ public class Test {
     }
 
     public int sum (int x){
+        System.out.println("ALF MABROOK");
        return x;
 
     }
