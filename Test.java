@@ -6,8 +6,7 @@ public class Test {
     }
 
     public int sum (int x){
-        System.out.println("7OTY SEMI COLON");
-        return x;
+       return x;
 
     }
 }
