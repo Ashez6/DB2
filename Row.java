@@ -1,6 +1,7 @@
-import java.util.*;
+import java.io.Serializable;
+import java.util.Vector;
 
-public class Row {
+public class Row implements Serializable {
     Vector<Object> vRow = new Vector<>();
 
     public Row(Object ... o){
