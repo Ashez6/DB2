@@ -1,20 +1,16 @@
-import java.io.*;
 import java.util.*;
 
 public class Page {
-    int size = 200;
-    Vector<Row> v = new Vector<>(size);
+    int N = 200;
+    Vector<Row> v = new Vector<>(N);
 
 
     public Page(){
 
     }
 
-    public void insert(Row x){
-        if(v.size() == size){
-            //TODO check if we need to throw an exception or not
-        }
-        else {
+    public void insert(Row x) {
+        if (v.size() != N) {
             v.add(x);
         }
     }
