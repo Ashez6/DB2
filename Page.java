@@ -10,8 +10,13 @@ public class Page {
 
     }
 
-    public void insert(Object x){
-
+    public void insert(Row x){
+        if(v.size() == size){
+            //TODO check if we need to throw an exception or not
+        }
+        else {
+            v.add(x);
+        }
     }
 
 
@@ -20,12 +25,11 @@ public class Page {
     public String toString() {
         String r = "";
         for (int i = 0; i < v.size() ; i++) {
-            if(i == v.size() - 1 ){
-                r += "" + v.elementAt(v.size() - 1);
-                break;
+            if(i == v.size() - 1){
+                r += "" + v.elementAt(i).toString() ;
             }
             else {
-                r += "" + v.elementAt(i) + ",";
+                r += "" + v.elementAt(i).toString() + ",";
             }
         }
         return r;
@@ -34,6 +38,8 @@ public class Page {
 
     public static void main(String[] args) {
         Page p = new Page();
+        p.insert(new Row("Ahmed", 20, "Zamalek"));
+
         System.out.println(p);
     }
 }
