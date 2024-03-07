@@ -2,21 +2,21 @@ import java.io.Serializable;
 import java.util.*;
 
 public class Page implements Serializable{
-    int N = 200;
-    Vector<Row> v = new Vector<>(N);
+    int N ;
+    Vector<Object> v = new Vector<>(N);
 
 
-    public Page(){
-
+    public Page(int n){
+        N=n;
     }
 
-    public void insert(Row x) {
+    public void insert(Object x) {
         if (v.size() != N) {
             v.add(x);
         }
     }
 
-    public void delete(Row x) {
+    public void delete(Object x) {
         v.remove(x);
     }
 
@@ -42,8 +42,8 @@ public class Page implements Serializable{
 
 
     public static void main(String[] args) {
-        Page p = new Page();
-        p.insert(new Row("Ahmed", 20, "Zamalek"));
+        Page p = new Page(200);
+        p.insert(new Tuple("Ahmed", 20, "Zamalek"));
 
         System.out.println(p);
     }

@@ -1,10 +1,10 @@
 import java.io.Serializable;
 import java.util.Vector;
 
-public class Row implements Serializable {
+public class Tuple implements Serializable {
     Vector<Object> vRow = new Vector<>();
 
-    public Row(Object ... o){
+    public Tuple(Object ... o){
         if(o != null) {
             vRow.addAll(java.util.Arrays.asList(o));
         }
@@ -29,7 +29,7 @@ public class Row implements Serializable {
     }
 
     public static void main(String[] args) {
-        Row r = new Row("Ahmed", 20, "Zamalek");
+        Tuple r = new Tuple("Ahmed", 20, "Zamalek");
 
         System.out.println(r);
     }
