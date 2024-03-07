@@ -1,13 +1,15 @@
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
 public class Page implements Serializable{
-    int N ;
+    String name;
+    int N=200 ;
     Vector<Object> v = new Vector<>(N);
 
 
-    public Page(int n){
-        N=n;
+    public Page(String name){
+        this.name=name;
     }
 
     public void insert(Object x) {
@@ -23,7 +25,6 @@ public class Page implements Serializable{
     public boolean empty(){
         return v.isEmpty() ;
     }
-
 
 
     @Override
