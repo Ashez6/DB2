@@ -16,6 +16,14 @@ public class Page{
         }
     }
 
+    public void delete(Row x) {
+        v.remove(x);
+    }
+
+    public boolean empty(){
+        return v.isEmpty() ;
+    }
+
 
 
     @Override
