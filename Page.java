@@ -1,7 +1,7 @@
 import java.io.Serializable;
 import java.util.*;
 
-public class Page{
+public class Page implements Serializable{
     int N = 200;
     Vector<Row> v = new Vector<>(N);
 
