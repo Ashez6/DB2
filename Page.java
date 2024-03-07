@@ -25,6 +25,9 @@ public class Page implements Serializable{
     public boolean empty(){
         return v.isEmpty() ;
     }
+    public boolean isFull(){
+        return v.size() == N;
+    }
 
 
     @Override
@@ -39,13 +42,5 @@ public class Page implements Serializable{
             }
         }
         return r;
-    }
-
-
-    public static void main(String[] args) {
-        Page p = new Page(200);
-        p.insert(new Tuple("Ahmed", 20, "Zamalek"));
-
-        System.out.println(p);
     }
 }
