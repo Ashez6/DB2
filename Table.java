@@ -27,12 +27,10 @@ public class Table implements Serializable{
         pageNames.remove(s);
         deletePageFile(s);
         
-
     }
-
     
     public static Page loadPageFromFile(String s){
-        Page p;
+        Page p=null;
         try {
          FileInputStream fileIn = new FileInputStream(s);
          ObjectInputStream in = new ObjectInputStream(fileIn);

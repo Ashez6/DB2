@@ -36,15 +36,30 @@ public class Page implements Serializable{
     public String toString() {
         String r = "";
         for (int i = 0; i < v.size() ; i++) {
+            Hashtable tuple = (Hashtable)v.elementAt(i);
             if(i == v.size() - 1){
-                r += "" + v.elementAt(i).toString() ;
+                r += "" + this.printTuple(tuple) ;
             }
             else {
-                r += "" + v.elementAt(i).toString() + ",";
+                r += "" + this.printTuple(tuple) + ",";
             }
         }
         return r;
     }
+
+    public String printTuple(Hashtable ht){
+        Object[] arr= ht.values().toArray();
+        String s="";
+        for(int i=arr.length-1;i>=0;i--){
+            s+= ""+arr[i];
+            if(i!=0){
+                s+=","; 
+            }
+        }
+        return s;
+    }
+
+    
 
         
     

@@ -127,7 +127,6 @@ public class DBApp {
 			htblColNameValue.put("gpa", new Double( 0.88 ) );
 			dbApp.insertIntoTable( strTableName , htblColNameValue );
 
-
 			SQLTerm[] arrSQLTerms;
 			arrSQLTerms = new SQLTerm[2];
 			arrSQLTerms[0]._strTableName =  "Student";
@@ -150,4 +149,5 @@ public class DBApp {
 		}
 	}
 
+}
 }
