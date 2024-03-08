@@ -24,7 +24,7 @@ public class Page implements Serializable{
         v.remove(x);
     }
 
-    public boolean empty(){
+    public boolean isEmpty(){
         return v.isEmpty() ;
     }
     public boolean isFull(){
