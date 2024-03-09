@@ -6,12 +6,19 @@ import java.util.*;
 
 public class Page implements Serializable{
     String name;
-    int N=200 ;
+    int N ;
     Vector<Object> v = new Vector<>(N);
-
+    
 
     public Page(String name){
         this.name=name;
+        Properties properties = new Properties();
+        try (FileInputStream input = new FileInputStream("resources/DBApp.config")) {
+            properties.load(input);
+            N = Integer.parseInt(properties.getProperty("MaximumRowsCountinPage"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void insert(Object x) {

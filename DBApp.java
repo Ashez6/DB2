@@ -2,6 +2,9 @@
 /** * @author Wael Abouelsaadat */ 
 
 import java.util.Iterator;
+
+import resources.bplustree;
+
 import java.util.Hashtable;
 
 
@@ -31,7 +34,7 @@ public class DBApp {
 	public void createTable(String strTableName, 
 							String strClusteringKeyColumn,  
 							Hashtable<String,String> htblColNameType) throws DBAppException{
-								
+		Table t=new Table(strTableName, strClusteringKeyColumn, htblColNameType);						
 		throw new DBAppException("not implemented yet");
 	}
 
@@ -40,7 +43,6 @@ public class DBApp {
 	public void createIndex(String   strTableName,
 							String   strColName,
 							String   strIndexName) throws DBAppException{
-		
 		throw new DBAppException("not implemented yet");
 	}
 
@@ -49,7 +51,7 @@ public class DBApp {
 	// htblColNameValue must include a value for the primary key
 	public void insertIntoTable(String strTableName, 
 								Hashtable<String,Object>  htblColNameValue) throws DBAppException{
-	
+									
 		throw new DBAppException("not implemented yet");
 	}
 

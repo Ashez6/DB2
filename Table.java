@@ -28,6 +28,7 @@ public class Table implements Serializable{
         deletePageFile(s);
         
     }
+
     
     public static Page loadPageFromFile(String s){
         Page p=null;
@@ -59,12 +60,12 @@ public class Table implements Serializable{
       }
     }
 
-    public void deletePageFile(String fileName) {
-        File file = new File(fileName);
+    public void deletePageFile(String s) {
+        File file = new File(s);
         if (file.exists()) {
             file.delete();
         } else {
-            System.out.println("Page file not found: " + fileName);
+            System.out.println("Page file not found: " + s);
         }
     }
 }

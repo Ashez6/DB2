@@ -16,8 +16,12 @@ public class Test {
 			htblColNameValue.put("gpa", new Double( 0.95 ) );
 
             Page p = new Page("aby");
-        p.insert(htblColNameType);
         p.insert(htblColNameValue);
-        System.out.println(p);
+       
+        Table t= new Table("test", "id", htblColNameType);
+        t.createPage();
+        System.out.println(p.N);
+        
+
     }
 }
