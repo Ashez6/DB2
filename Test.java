@@ -15,13 +15,16 @@ public class Test {
 			htblColNameValue.put("name", new String("Ahmed Noor" ) );
 			htblColNameValue.put("gpa", new Double( 0.95 ) );
 
-            Page p = new Page("aby");
-        p.insert(htblColNameValue);
-       
-        Table t= new Table("test", "id", htblColNameType);
+         DBApp d = new DBApp();
+        // try {
+        //     d.createTable("bobs", "id", htblColNameType);
+        // } catch (DBAppException e) {
+        //     // TODO Auto-generated catch block
+        //     e.printStackTrace();
+        // }
+        Table t= d.loadTableFromDisk("bobs.class");
         t.createPage();
-        System.out.println(p.N);
-        
+        t.createPage();
 
     }
 }

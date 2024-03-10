@@ -5,6 +5,12 @@ import java.util.Iterator;
 
 import resources.bplustree;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Hashtable;
 
 
@@ -34,8 +40,9 @@ public class DBApp {
 	public void createTable(String strTableName, 
 							String strClusteringKeyColumn,  
 							Hashtable<String,String> htblColNameType) throws DBAppException{
-		Table t=new Table(strTableName, strClusteringKeyColumn, htblColNameType);						
-		throw new DBAppException("not implemented yet");
+		Table t=new Table(strTableName, strClusteringKeyColumn, htblColNameType);	
+		saveTableToDisk(t);					
+		//throw new DBAppException("not implemented yet");
 	}
 
 
@@ -85,6 +92,44 @@ public class DBApp {
 		return null;
 	}
 
+	public Table loadTableFromDisk(String s){
+        Table t=null;
+        try {
+         FileInputStream fileIn = new FileInputStream(s);
+         ObjectInputStream in = new ObjectInputStream(fileIn);
+         t = (Table) in.readObject();
+         in.close();
+         fileIn.close();
+      } catch (IOException i) {
+         i.printStackTrace();
+      } catch (ClassNotFoundException c) {
+         System.out.println("Table class not found");
+         c.printStackTrace();
+      }
+      return t;
+    }
+
+	public void saveTableToDisk(Table t){
+        try {
+         FileOutputStream fileOut = new FileOutputStream(t.name+".class");
+         ObjectOutputStream out = new ObjectOutputStream(fileOut);
+         out.writeObject(t);
+         out.close();
+         fileOut.close();
+      } catch (IOException i) {
+         i.printStackTrace();
+         return;
+      }
+    }
+
+	public void deleteTableFile(String s) {
+        File file = new File(s);
+        if (file.exists()) {
+            file.delete();
+        } else {
+            System.out.println("Table file not found: " + s);
+        }
+    }
 
 	public static void main( String[] args ){
 	
@@ -151,5 +196,4 @@ public class DBApp {
 		}
 	}
 
-}
 }

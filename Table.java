@@ -20,7 +20,7 @@ public class Table implements Serializable{
         String pname=name + "" + NPages + ".class";
         pageNames.add(pname);
         Page p=new Page(pname);
-        this.savePageToFile(pname,p);
+        savePageToFile(p);
     }
 
     public void deletePage(String s){
@@ -30,7 +30,7 @@ public class Table implements Serializable{
     }
 
     
-    public static Page loadPageFromFile(String s){
+    public Page loadPageFromFile(String s){
         Page p=null;
         try {
          FileInputStream fileIn = new FileInputStream(s);
@@ -47,9 +47,9 @@ public class Table implements Serializable{
       return p;
     }
 
-    public void savePageToFile(String s,Page p){
+    public void savePageToFile(Page p){
         try {
-         FileOutputStream fileOut = new FileOutputStream(s);
+         FileOutputStream fileOut = new FileOutputStream(p.name);
          ObjectOutputStream out = new ObjectOutputStream(fileOut);
          out.writeObject(p);
          out.close();
