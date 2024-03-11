@@ -161,48 +161,66 @@ public class DBApp {
 	public void deleteTableFile(String s) {
         File file = new File(s);
         if (file.exists()) {
-            file.delete();
+//            file.delete();
+			try {
+				File metadata = new File("metadata.csv");
+				FileReader fr = new FileReader(metadata);
+				BufferedReader br = new BufferedReader(fr);
+
+				String line;
+				File tmpFile = null;
+				while((line = br.readLine()) != null){
+					String[] lineValues = line.split(",");
+					if((lineValues[0] + ".class").equals(s)){
+						tmpFile = deleteLine(metadata, lineValues[0]);
+					}
+				}
+
+				if(metadata.delete()){
+					System.out.println("Deleted");
+				}
+				if(tmpFile.renameTo(metadata)){
+					System.out.println("renamed");
+				}
+
+				br.close();
+
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
         } else {
             System.out.println("Table file not found: " + s);
         }
 
-		try {
-			File metadata = new File("metadata.csv");
-			FileReader fr = new FileReader(metadata);
-			BufferedReader br = new BufferedReader(fr);
 
-			String line;
-			while((line = br.readLine()) != null){
-				String[] lineValues = line.split(",");
-				if((lineValues[0] + ".class").equals(s)){
-					deleteLine(metadata, line);
-				}
-			}
-			br.close();
-
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 
 	}
 
-	public void deleteLine(File f, String l) throws IOException {
-		File tempFile = new File("myTempFile.txt");
+	public File deleteLine(File f, String l) {
+		File tempFile = new File("myTempFile.csv");
 
-		BufferedReader reader = new BufferedReader(new FileReader(f));
-		BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+		try {
 
-		String currentLine;
+			BufferedReader reader = new BufferedReader(new FileReader(f));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 
-		while((currentLine = reader.readLine()) != null) {
-			if(currentLine.equals(l)) continue;
-			writer.write(currentLine + System.getProperty("line.separator"));
+			String currentLine;
+
+			while ((currentLine = reader.readLine()) != null) {
+				String[] lineValues2 = currentLine.split(",");
+
+				if ((lineValues2[0]).equals(l)) continue;
+				writer.write(currentLine);
+				writer.newLine();
+			}
+			reader.close();
+			writer.close();
+
+			return tempFile;
 		}
-		writer.close();
-		reader.close();
-		boolean successful = tempFile.renameTo(f);
+		catch (IOException e){
+			throw new RuntimeException();
+		}
 	}
 
 	public static void main( String[] args ){

@@ -1,3 +1,0 @@
-ashez,gpa,java.lang.double,False,null,null
-ashez,name,java.lang.String,False,null,null
-ahmed,id,java.lang.Integer,True,null,null
