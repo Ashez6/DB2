@@ -5,7 +5,6 @@ import resources.bplustree;
 
 import java.io.*;
 import java.util.*;
-import au.com.bytecode.opencsv;
 
 
 public class DBApp {
@@ -36,22 +35,6 @@ public class DBApp {
 							Hashtable<String,String> htblColNameType) throws DBAppException{
 		Table t=new Table(strTableName, strClusteringKeyColumn, htblColNameType);	
 		saveTableToDisk(t);
-		File inputFile = new File(fileToUpdate);
-
-		// Read existing file 
-		CSVReader reader = new CSVReader(new FileReader(inputFile), ',');
-		List<String[]> csvBody = reader.readAll();
-		// get CSV row column  and replace with by using row and column
-		csvBody.get(row)[col] = replace;
-		reader.close();
-		
-		// Write to CSV file which is open
-		CSVWriter writer = new CSVWriter(new FileWriter(inputFile), ',');
-		writer.writeAll(csvBody);
-		writer.flush();
-		writer.close();
-		}
-		throw new DBAppException("not implemented yet");
 	}
 
 
