@@ -1,7 +1,8 @@
 
-/** * @author Wael Abouelsaadat */ 
+/** * @author Wael Abouelsaadat */
 
 import resources.bplustree;
+
 
 import java.io.*;
 import java.util.*;
@@ -12,15 +13,15 @@ public class DBApp {
 
 
 	public DBApp( ){
-		
+
 	}
 
-	// this does whatever initialization you would like 
-	// or leave it empty if there is no code you want to 
-	// execute at application startup 
+	// this does whatever initialization you would like
+	// or leave it empty if there is no code you want to
+	// execute at application startup
 	public void init( ){
-		
-		
+
+
 	}
 
 
@@ -28,106 +29,206 @@ public class DBApp {
 	// strClusteringKeyColumn is the name of the column that will be the primary
 	// key and the clustering column as well. The data type of that column will
 	// be passed in htblColNameType
-	// htblColNameValue will have the column name as key and the data 
+	// htblColNameValue will have the column name as key and the data
 	// type as value
-	public void createTable(String strTableName, 
-							String strClusteringKeyColumn,  
-							Hashtable<String,String> htblColNameType) throws DBAppException{
-		Table t=new Table(strTableName, strClusteringKeyColumn, htblColNameType);	
+	public void createTable(String strTableName,
+							String strClusteringKeyColumn,
+							Hashtable<String,String> htblColNameType)
+			throws DBAppException{
+
+		Table t=new Table(strTableName, strClusteringKeyColumn, htblColNameType);
 		saveTableToDisk(t);
+
+		// Writing to the CSV file
+		FileWriter csvFile;
+		try {
+			csvFile = new FileWriter("metadata.csv", true);
+
+			BufferedWriter bw = new BufferedWriter(csvFile);
+			Object[] colName =  htblColNameType.keySet().toArray();
+			Object[] colTypes =  htblColNameType.values().toArray();
+
+
+
+
+			//TableName,ColumnName, ColumnType, ClusteringKey, IndexName, IndexType
+			for (int i = 0; i < colName.length; i++) {
+				bw.write(strTableName + ",");
+				bw.write(colName[i].toString() + ",");
+				bw.write(colTypes[i].toString() + ",");
+				if (strClusteringKeyColumn.equals(colName[i].toString())){
+					bw.write("True,");
+				}
+				else {
+					bw.write("False,");
+				}
+
+				bw.write("null,");
+				bw.write("null");
+
+				bw.newLine();
+			}
+
+
+			bw.close();
+		}  catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		//throw new DBAppException("not implemented yet");
 	}
 
 
-	// following method creates a B+tree index 
+	// following method creates a B+tree index
 	public void createIndex(String   strTableName,
 							String   strColName,
 							String   strIndexName) throws DBAppException{
+
+		//TODO add file reader to read the metadata file and write the index columns
+
 		throw new DBAppException("not implemented yet");
 	}
 
 
-	// following method inserts one row only. 
+	// following method inserts one row only.
 	// htblColNameValue must include a value for the primary key
-	public void insertIntoTable(String strTableName, 
+	public void insertIntoTable(String strTableName,
 								Hashtable<String,Object>  htblColNameValue) throws DBAppException{
-									
+
 		throw new DBAppException("not implemented yet");
 	}
 
 
 	// following method updates one row only
-	// htblColNameValue holds the key and new value 
+	// htblColNameValue holds the key and new value
 	// htblColNameValue will not include clustering key as column name
 	// strClusteringKeyValue is the value to look for to find the row to update.
-	public void updateTable(String strTableName, 
+	public void updateTable(String strTableName,
 							String strClusteringKeyValue,
 							Hashtable<String,Object> htblColNameValue   )  throws DBAppException{
-	
+
 		throw new DBAppException("not implemented yet");
 	}
 
 
 	// following method could be used to delete one or more rows.
-	// htblColNameValue holds the key and value. This will be used in search 
-	// to identify which rows/tuples to delete. 	
+	// htblColNameValue holds the key and value. This will be used in search
+	// to identify which rows/tuples to delete.
 	// htblColNameValue enteries are ANDED together
-	public void deleteFromTable(String strTableName, 
+	public void deleteFromTable(String strTableName,
 								Hashtable<String,Object> htblColNameValue) throws DBAppException{
-	
+
 		throw new DBAppException("not implemented yet");
 	}
 
 
-	public Iterator selectFromTable(SQLTerm[] arrSQLTerms, 
+	public Iterator selectFromTable(SQLTerm[] arrSQLTerms,
 									String[]  strarrOperators) throws DBAppException{
-										
+
 		return null;
 	}
 
 	public Table loadTableFromDisk(String s){
-        Table t=null;
-        try {
-         FileInputStream fileIn = new FileInputStream(s);
-         ObjectInputStream in = new ObjectInputStream(fileIn);
-         t = (Table) in.readObject();
-         in.close();
-         fileIn.close();
-      } catch (IOException i) {
-         i.printStackTrace();
-      } catch (ClassNotFoundException c) {
-         System.out.println("Table class not found");
-         c.printStackTrace();
-      }
-      return t;
-    }
+		Table t=null;
+		try {
+			FileInputStream fileIn = new FileInputStream(s);
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			t = (Table) in.readObject();
+			in.close();
+			fileIn.close();
+		} catch (IOException i) {
+			i.printStackTrace();
+		} catch (ClassNotFoundException c) {
+			System.out.println("Table class not found");
+			c.printStackTrace();
+		}
+		return t;
+	}
 
 	public void saveTableToDisk(Table t){
-        try {
-         FileOutputStream fileOut = new FileOutputStream(t.name+".class");
-         ObjectOutputStream out = new ObjectOutputStream(fileOut);
-         out.writeObject(t);
-         out.close();
-         fileOut.close();
-      } catch (IOException i) {
-         i.printStackTrace();
-         return;
-      }
-    }
+		try {
+			FileOutputStream fileOut = new FileOutputStream(t.name+".class");
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(t);
+			out.close();
+			fileOut.close();
+		} catch (IOException i) {
+			i.printStackTrace();
+			return;
+		}
+	}
 
 	public void deleteTableFile(String s) {
-        File file = new File(s);
-        if (file.exists()) {
-            file.delete();
-        } else {
-            System.out.println("Table file not found: " + s);
-        }
-    }
+		File file = new File(s);
+		if (file.exists()) {
+//            file.delete();
+			try {
+				File metadata = new File("metadata.csv");
+				FileReader fr = new FileReader(metadata);
+				BufferedReader br = new BufferedReader(fr);
+
+				String line;
+				File tmpFile = null;
+				while((line = br.readLine()) != null){
+					String[] lineValues = line.split(",");
+					if((lineValues[0] + ".class").equals(s)){
+						tmpFile = deleteLine(metadata, lineValues[0]);
+					}
+				}
+
+				if(metadata.delete()){
+					System.out.println("Deleted");
+				}
+				if(tmpFile.renameTo(metadata)){
+					System.out.println("renamed");
+				}
+
+				br.close();
+
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			System.out.println("Table file not found: " + s);
+		}
+
+
+
+	}
+
+	public File deleteLine(File f, String l) {
+		File tempFile = new File("myTempFile.csv");
+
+		try {
+
+			BufferedReader reader = new BufferedReader(new FileReader(f));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+
+			String currentLine;
+
+			while ((currentLine = reader.readLine()) != null) {
+				String[] lineValues2 = currentLine.split(",");
+
+				if ((lineValues2[0]).equals(l)) continue;
+				writer.write(currentLine);
+				writer.newLine();
+			}
+			reader.close();
+			writer.close();
+
+			return tempFile;
+		}
+		catch (IOException e){
+			throw new RuntimeException();
+		}
+	}
 
 	public static void main( String[] args ){
-	
-	try{
+
+		try{
 			String strTableName = "Student";
 			DBApp	dbApp = new DBApp( );
+
 			Hashtable htblColNameType = new Hashtable( );
 			htblColNameType.put("id", "java.lang.Integer");
 			htblColNameType.put("name", "java.lang.String");
