@@ -3,6 +3,7 @@
 
 import resources.bplustree;
 
+
 import java.io.*;
 import java.util.*;
 
@@ -32,25 +33,49 @@ public class DBApp {
 	// type as value
 	public void createTable(String strTableName, 
 							String strClusteringKeyColumn,  
-							Hashtable<String,String> htblColNameType) throws DBAppException{
+							Hashtable<String,String> htblColNameType)
+			throws DBAppException{
+
 		Table t=new Table(strTableName, strClusteringKeyColumn, htblColNameType);	
 		saveTableToDisk(t);
-		File inputFile = new File(fileToUpdate);
 
-		// Read existing file 
-		CSVReader reader = new CSVReader(new FileReader(inputFile), ',');
-		List<String[]> csvBody = reader.readAll();
-		// get CSV row column  and replace with by using row and column
-		csvBody.get(row)[col] = replace;
-		reader.close();
-		
-		// Write to CSV file which is open
-		CSVWriter writer = new CSVWriter(new FileWriter(inputFile), ',');
-		writer.writeAll(csvBody);
-		writer.flush();
-		writer.close();
+		// Writing to the CSV file
+		FileWriter csvFile;
+		try {
+			csvFile = new FileWriter("metadata.csv");
+
+			BufferedWriter bw = new BufferedWriter(csvFile);
+			Object[] colName =  htblColNameType.keySet().toArray();
+			Object[] colTypes =  htblColNameType.values().toArray();
+
+
+
+
+			//TableName,ColumnName, ColumnType, ClusteringKey, IndexName, IndexType
+			for (int i = 0; i < colName.length; i++) {
+				bw.write(strTableName + ",");
+				bw.write(colName[i].toString() + ",");
+				bw.write(colTypes[i].toString() + ",");
+				if (strClusteringKeyColumn.equals(colName[i].toString())){
+					bw.write("True,");
+				}
+				else {
+					bw.write("False,");
+				}
+
+				bw.write("null,");
+				bw.write("null");
+
+				bw.newLine();
+			}
+
+
+			bw.close();
+		}  catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-		throw new DBAppException("not implemented yet");
+
+		//throw new DBAppException("not implemented yet");
 	}
 
 
@@ -58,6 +83,9 @@ public class DBApp {
 	public void createIndex(String   strTableName,
 							String   strColName,
 							String   strIndexName) throws DBAppException{
+
+		//TODO add file reader to read the metadata file and write the index columns
+
 		throw new DBAppException("not implemented yet");
 	}
 
