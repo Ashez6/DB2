@@ -175,6 +175,8 @@ public class DBApp {
 						tmpFile = deleteLine(metadata, lineValues[0]);
 					}
 				}
+				br.close();
+
 
 				if(metadata.delete()){
 					System.out.println("Deleted");
@@ -183,7 +185,6 @@ public class DBApp {
 					System.out.println("renamed");
 				}
 
-				br.close();
 
 			} catch (IOException e) {
 				throw new RuntimeException(e);
