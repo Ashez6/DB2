@@ -42,7 +42,7 @@ public class DBApp {
 		// Writing to the CSV file
 		FileWriter csvFile;
 		try {
-			csvFile = new FileWriter("metadata.csv");
+			csvFile = new FileWriter("metadata.csv", true);
 
 			BufferedWriter bw = new BufferedWriter(csvFile);
 			Object[] colName =  htblColNameType.keySet().toArray();
@@ -165,7 +165,45 @@ public class DBApp {
         } else {
             System.out.println("Table file not found: " + s);
         }
-    }
+
+		try {
+			File metadata = new File("metadata.csv");
+			FileReader fr = new FileReader(metadata);
+			BufferedReader br = new BufferedReader(fr);
+
+			String line;
+			while((line = br.readLine()) != null){
+				String[] lineValues = line.split(",");
+				if((lineValues[0] + ".class").equals(s)){
+					deleteLine(metadata, line);
+				}
+			}
+			br.close();
+
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	public void deleteLine(File f, String l) throws IOException {
+		File tempFile = new File("myTempFile.txt");
+
+		BufferedReader reader = new BufferedReader(new FileReader(f));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+
+		String currentLine;
+
+		while((currentLine = reader.readLine()) != null) {
+			if(currentLine.equals(l)) continue;
+			writer.write(currentLine + System.getProperty("line.separator"));
+		}
+		writer.close();
+		reader.close();
+		boolean successful = tempFile.renameTo(f);
+	}
 
 	public static void main( String[] args ){
 	
