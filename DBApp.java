@@ -237,33 +237,33 @@ public class DBApp {
 			dbApp.createIndex( strTableName, "gpa", "gpaIndex" );
 
 			Hashtable htblColNameValue = new Hashtable( );
-			htblColNameValue.put("id", new Integer( 2343432 ));
+			htblColNameValue.put("id", Integer.valueOf( 2343432 ));
 			htblColNameValue.put("name", new String("Ahmed Noor" ) );
-			htblColNameValue.put("gpa", new Double( 0.95 ) );
+			htblColNameValue.put("gpa", Double.valueOf( 0.95 ) );
 			dbApp.insertIntoTable( strTableName , htblColNameValue );
 
 			htblColNameValue.clear( );
-			htblColNameValue.put("id", new Integer( 453455 ));
+			htblColNameValue.put("id", Integer.valueOf( 453455 ));
 			htblColNameValue.put("name", new String("Ahmed Noor" ) );
-			htblColNameValue.put("gpa", new Double( 0.95 ) );
+			htblColNameValue.put("gpa",Double.valueOf( 0.95 ) );
 			dbApp.insertIntoTable( strTableName , htblColNameValue );
 
 			htblColNameValue.clear( );
-			htblColNameValue.put("id", new Integer( 5674567 ));
+			htblColNameValue.put("id", Integer.valueOf( 5674567 ));
 			htblColNameValue.put("name", new String("Dalia Noor" ) );
-			htblColNameValue.put("gpa", new Double( 1.25 ) );
+			htblColNameValue.put("gpa", Double.valueOf( 1.25 ) );
 			dbApp.insertIntoTable( strTableName , htblColNameValue );
 
 			htblColNameValue.clear( );
-			htblColNameValue.put("id", new Integer( 23498 ));
+			htblColNameValue.put("id",Integer.valueOf( 23498 ));
 			htblColNameValue.put("name", new String("John Noor" ) );
-			htblColNameValue.put("gpa", new Double( 1.5 ) );
+			htblColNameValue.put("gpa", Double.valueOf( 1.5 ) );
 			dbApp.insertIntoTable( strTableName , htblColNameValue );
 
 			htblColNameValue.clear( );
-			htblColNameValue.put("id", new Integer( 78452 ));
+			htblColNameValue.put("id", Integer.valueOf( 78452 ));
 			htblColNameValue.put("name", new String("Zaky Noor" ) );
-			htblColNameValue.put("gpa", new Double( 0.88 ) );
+			htblColNameValue.put("gpa", Double.valueOf( 0.88 ) );
 			dbApp.insertIntoTable( strTableName , htblColNameValue );
 
 			SQLTerm[] arrSQLTerms;
@@ -276,7 +276,7 @@ public class DBApp {
 			arrSQLTerms[1]._strTableName =  "Student";
 			arrSQLTerms[1]._strColumnName=  "gpa";
 			arrSQLTerms[1]._strOperator  =  "=";
-			arrSQLTerms[1]._objValue     =  new Double( 1.5 );
+			arrSQLTerms[1]._objValue     =  Double.valueOf( 1.5 );
 
 			String[]strarrOperators = new String[1];
 			strarrOperators[0] = "OR";
