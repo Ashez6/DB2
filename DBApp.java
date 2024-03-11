@@ -31,6 +31,8 @@ public class DBApp {
 	// be passed in htblColNameType
 	// htblColNameValue will have the column name as key and the data
 	// type as value
+
+	//TODO check if the table name is already in use
 	public void createTable(String strTableName,
 							String strClusteringKeyColumn,
 							Hashtable<String,String> htblColNameType)
@@ -86,7 +88,48 @@ public class DBApp {
 
 		//TODO add file reader to read the metadata file and write the index columns
 
-		throw new DBAppException("not implemented yet");
+		File mData = new File("metadata.csv");
+		try {
+			File tmpFile = new File("tempFile.csv");
+			FileReader fr = new FileReader(mData);
+			BufferedReader br = new BufferedReader(fr);
+			FileWriter fw = new FileWriter(tmpFile);
+			BufferedWriter bw = new BufferedWriter(fw);
+
+			String line;
+			while((line = br.readLine()) != null){
+
+				String[] lineValues = line.split(",");
+
+				if(lineValues[1].equals(strColName) && lineValues[0].equals(strTableName)){
+					lineValues[4] = strIndexName;
+					lineValues[5] = "B+tree";
+					String newLine = String.join(",", lineValues );
+					bw.write(newLine);
+					bw.newLine();
+				}
+				else {
+					bw.write(line);
+					bw.newLine();
+				}
+			}
+
+			br.close();
+			bw.close();
+
+			if(!mData.delete()){
+				throw new DBAppException("meta data not deleted");
+			}
+			if(!tmpFile.renameTo(mData)){
+				throw new DBAppException("temp file not renamed");
+			}
+
+
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+//		throw new DBAppException("not implemented yet");
 	}
 
 
@@ -161,7 +204,7 @@ public class DBApp {
 	public void deleteTableFile(String s) {
 		File file = new File(s);
 		if (file.exists()) {
-//            file.delete();
+            file.delete();
 			try {
 				File metadata = new File("metadata.csv");
 				FileReader fr = new FileReader(metadata);
@@ -178,15 +221,15 @@ public class DBApp {
 				br.close();
 
 
-				if(metadata.delete()){
-					System.out.println("Deleted");
+				if(!metadata.delete()){
+					throw new DBAppException("meta data not deleted");
 				}
-				if(tmpFile.renameTo(metadata)){
-					System.out.println("renamed");
+				if(!tmpFile.renameTo(metadata)){
+					throw new DBAppException("temp file not renamed");
 				}
 
 
-			} catch (IOException e) {
+			} catch (IOException | DBAppException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
@@ -197,6 +240,8 @@ public class DBApp {
 
 	}
 
+
+	// helper method to delete lines
 	public File deleteLine(File f, String l) {
 		File tempFile = new File("myTempFile.csv");
 

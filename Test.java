@@ -27,9 +27,11 @@ public class Test {
 //			throw new RuntimeException(e);
 //		}
 
-		d.deleteTableFile("ashez.class");
-
-
+		try {
+			d.createIndex("ashez", "gpa", "GPAindex");
+		} catch (DBAppException e) {
+			throw new RuntimeException(e);
+		}
 
 
 	}
