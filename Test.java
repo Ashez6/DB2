@@ -21,12 +21,9 @@ public class Test {
 			DBApp d = new DBApp();
 
 
-//		try {
-//			d.createTable("ashez", "id", htblColNameType);
-//		} catch (DBAppException e) {
-//			throw new RuntimeException(e);
-//		}
-		d.deleteTableFile("ashez.class");
+			d.deleteTableFile("ashez.class");
+
+
 
 
 	}
