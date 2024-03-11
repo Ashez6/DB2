@@ -1,17 +1,10 @@
 
 /** * @author Wael Abouelsaadat */ 
 
-import java.util.Iterator;
-
 import resources.bplustree;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Hashtable;
+import java.io.*;
+import java.util.*;
 
 
 public class DBApp {
@@ -41,8 +34,23 @@ public class DBApp {
 							String strClusteringKeyColumn,  
 							Hashtable<String,String> htblColNameType) throws DBAppException{
 		Table t=new Table(strTableName, strClusteringKeyColumn, htblColNameType);	
-		saveTableToDisk(t);					
-		//throw new DBAppException("not implemented yet");
+		saveTableToDisk(t);
+		File inputFile = new File(fileToUpdate);
+
+		// Read existing file 
+		CSVReader reader = new CSVReader(new FileReader(inputFile), ',');
+		List<String[]> csvBody = reader.readAll();
+		// get CSV row column  and replace with by using row and column
+		csvBody.get(row)[col] = replace;
+		reader.close();
+		
+		// Write to CSV file which is open
+		CSVWriter writer = new CSVWriter(new FileWriter(inputFile), ',');
+		writer.writeAll(csvBody);
+		writer.flush();
+		writer.close();
+		}
+		throw new DBAppException("not implemented yet");
 	}
 
 

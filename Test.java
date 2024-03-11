@@ -17,14 +17,14 @@ public class Test {
 
          DBApp d = new DBApp();
         // try {
-        //     d.createTable("bobs", "id", htblColNameType);
+        //     d.createTable("sam", "id", htblColNameType);
         // } catch (DBAppException e) {
         //     // TODO Auto-generated catch block
         //     e.printStackTrace();
         // }
-        Table t= d.loadTableFromDisk("bobs.class");
-        t.createPage();
-        t.createPage();
+         d.deleteTableFile("aby.class");
+        
+    
 
     }
 }
