@@ -21,17 +21,17 @@ public class Test {
 			DBApp d = new DBApp();
 
 
-//		try {
-//			d.createTable("ashez", "id", htblColNameType);
-//		} catch (DBAppException e) {
-//			throw new RuntimeException(e);
-//		}
-
 		try {
-			d.createIndex("ashez", "gpa", "GPAindex");
+			d.createTable("ashez", "id", htblColNameType);
 		} catch (DBAppException e) {
 			throw new RuntimeException(e);
 		}
+
+		// try {
+		// 	d.createIndex("ashez", "gpa", "GPAindex");
+		// } catch (DBAppException e) {
+		// 	throw new RuntimeException(e);
+		// }
 
 
 	}

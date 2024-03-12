@@ -32,12 +32,15 @@ public class DBApp {
 	// htblColNameValue will have the column name as key and the data
 	// type as value
 
-	//TODO check if the table name is already in use
 	public void createTable(String strTableName,
 							String strClusteringKeyColumn,
 							Hashtable<String,String> htblColNameType)
 			throws DBAppException{
-
+		
+		File dupCheck = new File(strTableName+".class");
+		if(dupCheck.exists()){
+			throw new DBAppException("Table name already in use.");
+		}
 		Table t=new Table(strTableName, strClusteringKeyColumn, htblColNameType);
 		saveTableToDisk(t);
 
@@ -49,10 +52,6 @@ public class DBApp {
 			BufferedWriter bw = new BufferedWriter(csvFile);
 			Object[] colName =  htblColNameType.keySet().toArray();
 			Object[] colTypes =  htblColNameType.values().toArray();
-
-
-
-
 			//TableName,ColumnName, ColumnType, ClusteringKey, IndexName, IndexType
 			for (int i = 0; i < colName.length; i++) {
 				bw.write(strTableName + ",");
@@ -70,8 +69,6 @@ public class DBApp {
 
 				bw.newLine();
 			}
-
-
 			bw.close();
 		}  catch (IOException e) {
 			throw new RuntimeException(e);
