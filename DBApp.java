@@ -41,7 +41,7 @@ public class DBApp {
 		if(dupCheck.exists()){
 			throw new DBAppException("Table name already in use.");
 		}
-		Table t=new Table(strTableName, strClusteringKeyColumn, htblColNameType);
+		Table t=new Table(strTableName, strClusteringKeyColumn);
 		saveTableToDisk(t);
 
 		// Writing to the CSV file
@@ -198,7 +198,7 @@ public class DBApp {
 		}
 	}
 
-	public void deleteTableFile(String s) {
+	public void deleteTableFile(String s) throws DBAppException{
 		File file = new File(s);
 		if (file.exists()) {
             file.delete();
@@ -226,11 +226,11 @@ public class DBApp {
 				}
 
 
-			} catch (IOException | DBAppException e) {
-				throw new RuntimeException(e);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		} else {
-			System.out.println("Table file not found: " + s);
+			throw new DBAppException("Table file not found: " + s);
 		}
 
 

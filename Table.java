@@ -4,15 +4,41 @@ import java.util.*;
 public class Table implements Serializable{
     String name;
     String cKey;
-    Hashtable<String,String> colNameType;
     ArrayList<String> pageNames = new ArrayList<>();
     int NPages;
 
 
-    public Table(String name,String cKey,Hashtable<String,String> colNameType){
+    public Table(String name,String cKey){
         this.name=name;
         this.cKey=cKey;
-        this.colNameType=colNameType;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public String getCKey(){
+        return cKey;
+    }
+
+    public int getNPages(){
+        return NPages;
+    }
+
+    public ArrayList<String> getPageNames(){
+        return pageNames;
+    }
+
+    public void setName(String s){
+        this.name=s;
+    }
+
+    public void setNPages(int n){
+        this.NPages=n;
+    }
+
+    public void setPageNames(ArrayList<String> a){
+        this.pageNames=a;
     }
 
     public void createPage(){

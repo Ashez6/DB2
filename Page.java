@@ -7,7 +7,7 @@ import java.util.*;
 public class Page implements Serializable {
     String name;
     int N;
-    Vector<Object> v = new Vector<>(N);
+    Vector<Object> tuples = new Vector<>(N);
 
     public Page(String name) {
         this.name = name;
@@ -20,30 +20,47 @@ public class Page implements Serializable {
         }
     }
 
+    public String getName(){
+        return name;
+    }
+
+    public int getN(){
+        return N;
+    }
+
+    public Vector<Object> getTuples(){
+        return tuples;
+    }
+
+    public void setName(String s){
+        this.name=s;
+    }
+
+
     public void insert(Object x) {
-        if (v.size() != N) {
-            v.add(x);
+        if (tuples.size() != N) {
+            tuples.add(x);
         }
     }
 
     public void delete(Object x) {
-        v.remove(x);
+        tuples.remove(x);
     }
 
     public boolean isEmpty() {
-        return v.isEmpty();
+        return tuples.isEmpty();
     }
 
     public boolean isFull() {
-        return v.size() == N;
+        return tuples.size() == N;
     }
 
     @Override
     public String toString() {
         String r = "";
-        for (int i = 0; i < v.size(); i++) {
-            Hashtable tuple = (Hashtable) v.elementAt(i);
-            if (i == v.size() - 1) {
+        for (int i = 0; i < tuples.size(); i++) {
+            Hashtable tuple = (Hashtable) tuples.elementAt(i);
+            if (i == tuples.size() - 1) {
                 r += "" + this.printTuple(tuple);
             } else {
                 r += "" + this.printTuple(tuple) + ",";
