@@ -134,8 +134,36 @@ public class DBApp {
 	// htblColNameValue must include a value for the primary key
 	public void insertIntoTable(String strTableName,
 								Hashtable<String,Object>  htblColNameValue) throws DBAppException{
+		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
+		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
+		FileReader fr;
+		try {
+			fr = new FileReader("metadata.csv");
+			BufferedReader br = new BufferedReader(fr);
+			String line ;
+			while((line = br.readLine()) != null){
+				String[] arr= line.split(",");
+				if(arr[0].equals(strTableName)){
+					if(colNames.contains(arr[1])){
+						int index=colNames.indexOf(arr[1]);
+						String type=colValues.get(index).getClass().getName();
+						if(!type.equals(arr[2])){
+							throw new DBAppException("Invalid input datatypes.");
+						}
+					}
+					else{
+						throw new DBAppException("All columns should have a not null value.");
+					}
+				}
+			}
+			br.close();
 
-		throw new DBAppException("not implemented yet");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		//throw new DBAppException("not implemented yet");
 	}
 
 

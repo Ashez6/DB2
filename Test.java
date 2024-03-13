@@ -1,7 +1,9 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 public class Test {
 
@@ -10,7 +12,7 @@ public class Test {
        Hashtable htblColNameType = new Hashtable( );
 			htblColNameType.put("id", "java.lang.Integer");
 			htblColNameType.put("name", "java.lang.String");
-			htblColNameType.put("gpa", "java.lang.double");
+			htblColNameType.put("gpa", "java.lang.Double");
 
 
 			Hashtable htblColNameValue = new Hashtable( );
@@ -21,12 +23,20 @@ public class Test {
 			DBApp d = new DBApp();
 
 
+		// try {
+		// 	d.createTable("aby", "id", htblColNameType);
+		// } catch (DBAppException e) {
+		// 	throw new RuntimeException(e);
+		// }
+
 		try {
-			d.createTable("ashez", "id", htblColNameType);
+			d.insertIntoTable("aby", htblColNameValue);
 		} catch (DBAppException e) {
-			throw new RuntimeException(e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
+		
 		// try {
 		// 	d.createIndex("ashez", "gpa", "GPAindex");
 		// } catch (DBAppException e) {
