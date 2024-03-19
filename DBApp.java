@@ -83,8 +83,6 @@ public class DBApp {
 							String   strColName,
 							String   strIndexName) throws DBAppException{
 
-		//TODO add file reader to read the metadata file and write the index columns
-
 		File mData = new File("metadata.csv");
 		try {
 			File tmpFile = new File("tempFile.csv");
@@ -229,6 +227,14 @@ public class DBApp {
 	public void deleteTableFile(String s) throws DBAppException{
 		File file = new File(s);
 		if (file.exists()) {
+			Table t=loadTableFromDisk(s);
+			ArrayList<String> temp=new ArrayList<String>();
+			for(String name : t.getPageNames()){
+				temp.add(name);
+			}
+			for(String name : temp){
+				t.deletePage(name);
+			}
             file.delete();
 			try {
 				File metadata = new File("metadata.csv");

@@ -21,27 +21,27 @@ public class Test {
 			htblColNameValue.put("gpa", Double.valueOf( 0.95 ) );
 
 			DBApp d = new DBApp();
-
-
-		// try {
-		// 	d.createTable("aby", "id", htblColNameType);
-		// } catch (DBAppException e) {
-		// 	throw new RuntimeException(e);
-		// }
-
-		try {
-			d.insertIntoTable("aby", htblColNameValue);
-		} catch (DBAppException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		
-		// try {
-		// 	d.createIndex("ashez", "gpa", "GPAindex");
-		// } catch (DBAppException e) {
-		// 	throw new RuntimeException(e);
-		// }
+			// Table t=d.loadTableFromDisk("NotZomix.class");
+			// t.getPageNames().remove("NotZomix1.class");
+			// System.out.println(t.getPageNames());
+			// d.saveTableToDisk(t);
+			// try {
+			// 	d.createTable("Zomix", "id", htblColNameType);
+			// } catch (DBAppException e) {
+			// 	// TODO Auto-generated catch block
+			// 	e.printStackTrace();
+			// }
+			// Table t=d.loadTableFromDisk("Zomix.class");
+			// t.createPage();
+			// t.createPage();
+			// t.createPage();
+			// d.saveTableToDisk(t);
+			try {
+				d.deleteTableFile("Zomix.class");
+			} catch (DBAppException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 
 	}

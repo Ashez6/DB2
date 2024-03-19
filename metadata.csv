@@ -7,3 +7,6 @@ ashez,id,java.lang.Integer,True,null,null
 aby,gpa,java.lang.Double,False,null,null
 aby,name,java.lang.String,False,null,null
 aby,id,java.lang.Integer,True,null,null
+zomix,gpa,java.lang.Double,False,null,null
+zomix,name,java.lang.String,False,null,null
+zomix,id,java.lang.Integer,True,null,null
