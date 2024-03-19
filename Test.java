@@ -25,24 +25,8 @@ public class Test {
 			// t.getPageNames().remove("NotZomix1.class");
 			// System.out.println(t.getPageNames());
 			// d.saveTableToDisk(t);
-			// try {
-			// 	d.createTable("Zomix", "id", htblColNameType);
-			// } catch (DBAppException e) {
-			// 	// TODO Auto-generated catch block
-			// 	e.printStackTrace();
-			// }
-			// Table t=d.loadTableFromDisk("Zomix.class");
-			// t.createPage();
-			// t.createPage();
-			// t.createPage();
-			// d.saveTableToDisk(t);
-			try {
-				d.deleteTableFile("Zomix.class");
-			} catch (DBAppException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
+			
+			System.out.println("hazem1".compareTo("hazem"));
 
 	}
 }

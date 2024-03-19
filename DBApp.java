@@ -164,7 +164,21 @@ public class DBApp {
 		//throw new DBAppException("not implemented yet");
 	}
 
-
+	public void linearInsert(String strTableName,
+	Hashtable<String,Object>  htblColNameValue){
+		Table t = loadTableFromDisk(strTableName);
+		Iterator<String> it=t.getPageNames().iterator();
+		Page p;
+		while(it.hasNext()){
+			p=(Page)t.loadPageFromFile(it.next());
+			int pos=p.linearSearch(t.getCKey(), htblColNameValue);
+			if(pos>=0){
+				p.getTuples().insertElementAt(htblColNameValue, pos);
+				break;
+			}
+			//TO DO Insert linearly
+		}
+	}
 	// following method updates one row only
 	// htblColNameValue holds the key and new value
 	// htblColNameValue will not include clustering key as column name

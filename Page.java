@@ -55,6 +55,18 @@ public class Page implements Serializable {
         return tuples.size() == N;
     }
 
+    public int linearSearch(String key,Hashtable<String,Object> toInsert){
+        for (int i = 0; i < tuples.size(); i++) {
+            Hashtable tuple = (Hashtable) tuples.elementAt(i);
+            String s=tuple.get(key).toString();
+            String s1=toInsert.get(key).toString();
+            if(s.compareTo(s1)>=0){
+                return i;
+            }  
+        }
+        return -1;
+    }
+
     @Override
     public String toString() {
         String r = "";
