@@ -36,9 +36,12 @@ public class Page implements Serializable {
         this.name=s;
     }
 
+    public void setTuples(Vector<Object> v){
+        this.tuples=v;
+    }
 
     public void insert(Object x) {
-        if (tuples.size() != N) {
+        if (!isFull()) {
             tuples.add(x);
         }
     }
@@ -55,16 +58,57 @@ public class Page implements Serializable {
         return tuples.size() == N;
     }
 
-    public int linearSearch(String key,Hashtable<String,Object> toInsert){
+    public Object getLastTuple(){
+        return tuples.lastElement();
+    }
+
+    public int linearTupleSearch(String key,Object o){
         for (int i = 0; i < tuples.size(); i++) {
             Hashtable tuple = (Hashtable) tuples.elementAt(i);
             String s=tuple.get(key).toString();
-            String s1=toInsert.get(key).toString();
-            if(s.compareTo(s1)>=0){
+            if(s.equals(o.toString()){
                 return i;
             }  
+            
         }
         return -1;
+    }
+
+    public int BinaryTupleSearch(String ckey,Object o){
+        int max=tuples.size()-1;
+        int min=0;
+        int mid;
+        while(min<=max){
+            mid=(max+min)/2;
+            Hashtable tuple = (Hashtable) tuples.elementAt(mid);
+            String s=tuple.get(ckey).toString();
+            if(s.equals(o.toString()))
+              return mid;
+            else if(s.compareTo(o.toString())>0)
+              max=mid-1;
+            else
+              min=mid+1;
+        }
+        return -1;
+    }
+
+    public int getInsertLoc(String ckey,Object o){
+        int max=tuples.size()-1;
+        int min=0;
+        int mid;
+        int res = -1;
+        while(min<=max){
+            mid=(max+min)/2;
+            Hashtable tuple = (Hashtable) tuples.elementAt(mid);
+            String s=tuple.get(ckey).toString();
+            if(s.compareTo(o.toString())>=0){
+              res= mid;
+              max=mid-1;
+            }
+            else
+              min=mid+1;
+        }
+        return res;
     }
 
     @Override

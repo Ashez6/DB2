@@ -167,17 +167,51 @@ public class DBApp {
 	public void linearInsert(String strTableName,
 	Hashtable<String,Object>  htblColNameValue){
 		Table t = loadTableFromDisk(strTableName);
-		Iterator<String> it=t.getPageNames().iterator();
-		Page p;
-		while(it.hasNext()){
-			p=(Page)t.loadPageFromFile(it.next());
-			int pos=p.linearSearch(t.getCKey(), htblColNameValue);
-			if(pos>=0){
-				p.getTuples().insertElementAt(htblColNameValue, pos);
-				break;
-			}
-			//TO DO Insert linearly
+		String targetPage=null;
+		String ckey=t.getCKey();
+		Object value=htblColNameValue.get(ckey);
+		for (int i = 0; i < t.getPageNames().size(); i++) {
+            String pagename = t.getPageNames().elementAt(i);
+            Page p =t.loadPageFromFile(pagename);
+            if(p.getInsertLoc(ckey, value)!=-1){
+                targetPage=pagename;
+            }
+        }
+		boolean flag=false;
+		if(targetPage==null){
+			targetPage=t.getPageNames().lastElement();
+			flag=true;
 		}
+		Page p =t.loadPageFromFile(targetPage);
+		if(flag){
+			if(p.isFull()){
+				t.createPage();
+				p=t.loadPageFromFile(t.getPageNames().lastElement());
+			}
+			p.insert(htblColNameValue);
+		}
+		else{
+			int index=p.getInsertLoc(ckey, htblColNameValue);
+			if(!p.isFull()){
+				Vector<Object> v=p.getTuples();
+				v.insertElementAt(htblColNameValue, index);
+				p.setTuples(v);
+			}
+			else{
+				Page tempPage=p;
+				while(tempPage.isFull()){
+					Object shift=tempPage.getLastTuple();
+					tempPage.delete(shift);
+					int currPage=t.getPageNames().indexOf(tempPage.getName());
+					tempPage=t.loadPageFromFile(t.getPageNames().get(currPage+1));
+				}
+				//TO DO insert ripple
+			}
+
+
+		}
+			
+		
 	}
 	// following method updates one row only
 	// htblColNameValue holds the key and new value
@@ -242,7 +276,7 @@ public class DBApp {
 		File file = new File(s);
 		if (file.exists()) {
 			Table t=loadTableFromDisk(s);
-			ArrayList<String> temp=new ArrayList<String>();
+			Vector<String> temp=new Vector<String>();
 			for(String name : t.getPageNames()){
 				temp.add(name);
 			}

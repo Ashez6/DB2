@@ -4,7 +4,7 @@ import java.util.*;
 public class Table implements Serializable{
     String name;
     String cKey;
-    ArrayList<String> pageNames = new ArrayList<>();
+    Vector<String> pageNames = new Vector<String>();
     int NPages;
 
 
@@ -25,7 +25,7 @@ public class Table implements Serializable{
         return NPages;
     }
 
-    public ArrayList<String> getPageNames(){
+    public Vector<String> getPageNames(){
         return pageNames;
     }
 
@@ -37,8 +37,8 @@ public class Table implements Serializable{
         this.NPages=n;
     }
 
-    public void setPageNames(ArrayList<String> a){
-        this.pageNames=a;
+    public void setPageNames(Vector<String> v){
+        this.pageNames=v;
     }
 
     public void createPage(){
