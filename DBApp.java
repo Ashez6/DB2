@@ -132,6 +132,7 @@ public class DBApp {
 	// htblColNameValue must include a value for the primary key
 	public void insertIntoTable(String strTableName,
 								Hashtable<String,Object>  htblColNameValue) throws DBAppException{
+		boolean hasIndex=false;
 		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
 		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
 		FileReader fr;
@@ -148,6 +149,9 @@ public class DBApp {
 						if(!type.equals(arr[2])){
 							throw new DBAppException("Invalid input datatypes.");
 						}
+						if(!arr[4].equals("null")){
+							hasIndex=true;
+						}
 					}
 					else{
 						throw new DBAppException("All columns should have a not null value.");
@@ -157,16 +161,31 @@ public class DBApp {
 			br.close();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+
+		if(hasIndex){
+			//TODO call insert using index
+		}
+		else{
+			linearInsert(strTableName, htblColNameValue);
 		}
 
 		//throw new DBAppException("not implemented yet");
 	}
 
 	public void linearInsert(String strTableName,
-	Hashtable<String,Object>  htblColNameValue){
+		Hashtable<String,Object>  htblColNameValue){
 		Table t = loadTableFromDisk(strTableName);
+		
+		if(t.getNPages()==0){
+			t.createPage();
+			Page p=t.loadPageFromFile(t.getPageNames().lastElement());
+			p.insert(htblColNameValue);
+			t.savePageToFile(p);
+			saveTableToDisk(t);
+			return;
+		}
 		String targetPage=null;
 		String ckey=t.getCKey();
 		Object value=htblColNameValue.get(ckey);
@@ -177,41 +196,55 @@ public class DBApp {
                 targetPage=pagename;
             }
         }
-		boolean flag=false;
+		Page p;
 		if(targetPage==null){
 			targetPage=t.getPageNames().lastElement();
-			flag=true;
-		}
-		Page p =t.loadPageFromFile(targetPage);
-		if(flag){
+			p =t.loadPageFromFile(targetPage);
 			if(p.isFull()){
 				t.createPage();
 				p=t.loadPageFromFile(t.getPageNames().lastElement());
 			}
 			p.insert(htblColNameValue);
+			t.savePageToFile(p);
+		    saveTableToDisk(t);
+			return;
+		}
+		p =t.loadPageFromFile(targetPage);
+
+		if(!p.isFull()){
+			int index=p.getInsertLoc(ckey, value);
+			Vector<Object> v=p.getTuples();
+		    v.insertElementAt(htblColNameValue, index);
+		    p.setTuples(v);
 		}
 		else{
-			int index=p.getInsertLoc(ckey, htblColNameValue);
-			if(!p.isFull()){
-				Vector<Object> v=p.getTuples();
-				v.insertElementAt(htblColNameValue, index);
-				p.setTuples(v);
+			int currPage=t.getPageNames().indexOf(p.getName());
+			Page tempPage=t.loadPageFromFile(t.getPageNames().get(currPage++));
+			Object last=p.getLastTuple();
+			p.delete(last);
+			int index=p.getInsertLoc(ckey, value);
+			Vector<Object> v=p.getTuples();
+		    v.insertElementAt(htblColNameValue, index);
+		    p.setTuples(v);
+			Object first=last;
+			while(tempPage.isFull()){
+				last=tempPage.getLastTuple();
+				tempPage.delete(last);
+				v=tempPage.getTuples();
+				v.insertElementAt(first, 0);
+				tempPage.setTuples(v);
+				t.savePageToFile(tempPage);
+				first=last;
+				tempPage=t.loadPageFromFile(t.getPageNames().get(currPage++));
 			}
-			else{
-				Page tempPage=p;
-				while(tempPage.isFull()){
-					Object shift=tempPage.getLastTuple();
-					tempPage.delete(shift);
-					int currPage=t.getPageNames().indexOf(tempPage.getName());
-					tempPage=t.loadPageFromFile(t.getPageNames().get(currPage+1));
-				}
-				//TO DO insert ripple
-			}
-
-
+			v=tempPage.getTuples();
+			v.insertElementAt(first, 0);
+			tempPage.setTuples(v);
+			t.savePageToFile(tempPage);
 		}
-			
-		
+		t.savePageToFile(p);
+		saveTableToDisk(t);
+
 	}
 	// following method updates one row only
 	// htblColNameValue holds the key and new value

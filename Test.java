@@ -41,28 +41,29 @@ public class Test {
 
 
 			Hashtable htblColNameValue = new Hashtable( );
-			htblColNameValue.put("id", Integer.valueOf( 2343432 ));
+			htblColNameValue.put("id", Integer.valueOf( 2343230 ));
 			htblColNameValue.put("name", new String("Ahmed Noor" ) );
 			htblColNameValue.put("gpa", Double.valueOf( 0.95 ) );
 
 			DBApp d = new DBApp();
-			//int[] arr = {1, 3, 5, 7, 9, 11, 13};
-			Vector<Object> v=new Vector<>(10);
-			v.add(1);
-			v.add(3);
-			v.add(5);
-			v.add(7);
-			v.add(9);
-			v.add(11);
-			v.add(13);
-			v.add(14);
-			v.add(15);
-			v.add(16);
-			v.add(17);
-			int target = 0;
-			int index = firstGreater(v, target);
-			v.insertElementAt(target, index);
-			System.out.println(v);
-			
+			// try {
+			// 	d.createTable("aby", "id", htblColNameType);
+			// } catch (DBAppException e) {
+			// 	// TODO Auto-generated catch block
+			// 	e.printStackTrace();
+			// }
+			// try {
+			// 	d.deleteTableFile("aby.class");
+			// } catch (DBAppException e) {
+			// 	// TODO Auto-generated catch block
+			// 	e.printStackTrace();
+			// }
+			// try {
+			// 	d.insertIntoTable("aby.class", htblColNameValue);
+			// } catch (DBAppException e) {
+			// 	// TODO Auto-generated catch block
+			// 	e.printStackTrace();
+			// }
+			System.out.println(d.loadTableFromDisk("aby.class").loadPageFromFile("aby1.class").toString());
 	}
 }

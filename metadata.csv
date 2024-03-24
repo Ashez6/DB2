@@ -1,1 +1,3 @@
-
+aby,gpa,java.lang.Double,False,null,null
+aby,name,java.lang.String,False,null,null
+aby,id,java.lang.Integer,True,null,null
