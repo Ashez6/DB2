@@ -194,6 +194,7 @@ public class DBApp {
             Page p =t.loadPageFromFile(pagename);
             if(p.getInsertLoc(ckey, value)!=-1){
                 targetPage=pagename;
+				break;
             }
         }
 		Page p;
@@ -219,10 +220,14 @@ public class DBApp {
 		}
 		else{
 			int currPage=t.getPageNames().indexOf(p.getName());
-			Page tempPage=t.loadPageFromFile(t.getPageNames().get(currPage++));
+			if(t.getPageNames().lastElement().equals(p.getName())){
+				t.createPage();
+			}
+			String tempName=t.getPageNames().get(++currPage);
+			Page tempPage=t.loadPageFromFile(tempName);
 			Object last=p.getLastTuple();
-			p.delete(last);
 			int index=p.getInsertLoc(ckey, value);
+			p.delete(last);
 			Vector<Object> v=p.getTuples();
 		    v.insertElementAt(htblColNameValue, index);
 		    p.setTuples(v);
@@ -235,7 +240,10 @@ public class DBApp {
 				tempPage.setTuples(v);
 				t.savePageToFile(tempPage);
 				first=last;
-				tempPage=t.loadPageFromFile(t.getPageNames().get(currPage++));
+				if(t.getPageNames().lastElement().equals(tempPage.getName())){
+					t.createPage();
+				}
+				tempPage=t.loadPageFromFile(t.getPageNames().get(++currPage));
 			}
 			v=tempPage.getTuples();
 			v.insertElementAt(first, 0);
