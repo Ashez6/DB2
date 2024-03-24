@@ -142,7 +142,7 @@ public class DBApp {
 			String line ;
 			while((line = br.readLine()) != null){
 				String[] arr= line.split(",");
-				if(arr[0].equals(strTableName)){
+				if((arr[0]+".class").equals(strTableName)){
 					if(colNames.contains(arr[1])){
 						int index=colNames.indexOf(arr[1]);
 						String type=colValues.get(index).getClass().getName();
@@ -261,8 +261,62 @@ public class DBApp {
 	public void updateTable(String strTableName,
 							String strClusteringKeyValue,
 							Hashtable<String,Object> htblColNameValue   )  throws DBAppException{
+		boolean hasIndex=false;
+		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
+		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
+		FileReader fr;
+		try {
+			fr = new FileReader("metadata.csv");
+			BufferedReader br = new BufferedReader(fr);
+			String line ;
+			while((line = br.readLine()) != null){
+				String[] arr= line.split(",");
+				if((arr[0]+".class").equals(strTableName)){
+					int index=colNames.indexOf(arr[1]);
+					if(!arr[4].equals("null")){
+						hasIndex=true;
+					}
+					if(index==-1){
+						continue;
+					}
+					String type=colValues.get(index).getClass().getName();
+					if(!type.equals(arr[2])){
+						throw new DBAppException("Invalid input datatypes.");
+					}
+				}
+			}
+			br.close();
 
-		throw new DBAppException("not implemented yet");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		Table t=loadTableFromDisk(strTableName);
+		String ckey=t.getCKey();
+		if(hasIndex){
+			//TODO call update using index
+		}
+		else{
+			Page p=null;
+			outerloop : for (int i = 0; i < t.getPageNames().size(); i++) {
+				String pagename = t.getPageNames().elementAt(i);
+				p =t.loadPageFromFile(pagename);
+				Vector<Object> v=p.getTuples();
+				for(int j=0;j<v.size();j++){
+					Hashtable<String,Object> ht=(Hashtable<String,Object>)v.elementAt(j);
+					if(strClusteringKeyValue.equals(ht.get(ckey).toString())){
+						for(int k=0;k<colNames.size();k++){
+							ht.put(colNames.get(k).toString(),colValues.get(k));
+						}
+						v.setElementAt(ht, j);
+						p.setTuples(v);
+						break outerloop;
+					}
+				}
+			}
+			t.savePageToFile(p);
+		}
+		//throw new DBAppException("not implemented yet");
 	}
 
 

@@ -46,7 +46,7 @@ public class Test {
 			htblColNameValue.put("gpa", Double.valueOf( 0.95 ) );
 
 			Hashtable tup1 = new Hashtable( );
-			tup1.put("id", Integer.valueOf( 1 ));
+			tup1.put("id", Integer.valueOf( 0 ));
 			tup1.put("name", new String("Aby" ) );
 			tup1.put("gpa", Double.valueOf( 0.95 ) );
 
@@ -57,7 +57,7 @@ public class Test {
 
 			Hashtable tup3 = new Hashtable( );
 			tup3.put("id", Integer.valueOf( 3 ));
-			tup3.put("name", new String("sam" ) );
+			tup3.put("name", 1 );
 			tup3.put("gpa", Double.valueOf( 0.95 ) );
 
 			Hashtable tup4 = new Hashtable( );
@@ -100,8 +100,17 @@ public class Test {
 			// 	// TODO Auto-generated catch block
 			// 	e.printStackTrace();
 			// }
+			// try {
+			// 	d.insertIntoTable("Ashez.class", tup3);
+			// } catch (DBAppException e) {
+			// 	// TODO Auto-generated catch block
+			// 	e.printStackTrace();
+			// }
+			Hashtable testt=new Hashtable<>();
+			testt.put("name", "zomixat");
+			testt.put("gpa", "hi");
 			try {
-				d.insertIntoTable("Ashez.class", tup6);
+				d.updateTable("Ashez.class", "5", testt);
 			} catch (DBAppException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -109,6 +118,7 @@ public class Test {
 			System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez1.class"));
 			System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez2.class"));
 			System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez3.class"));
-			
+			System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez4.class"));
+			System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez5.class"));			
 	}
 }
