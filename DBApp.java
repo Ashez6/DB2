@@ -326,8 +326,41 @@ public class DBApp {
 	// htblColNameValue enteries are ANDED together
 	public void deleteFromTable(String strTableName,
 								Hashtable<String,Object> htblColNameValue) throws DBAppException{
-
-		throw new DBAppException("not implemented yet");
+		Table t=loadTableFromDisk(strTableName);
+		Vector<String> pages=t.getPageNames();
+		Page p=null;
+		Iterator<String> pItr=pages.iterator();
+		Iterator<Object> tItr;
+		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
+		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
+		while(pItr.hasNext()){
+			p=t.loadPageFromFile(pItr.next());
+			Vector<Object> Tuples=p.getTuples();
+			tItr=Tuples.iterator();
+			while(tItr.hasNext()){
+				boolean flag=true;
+				Hashtable ht=(Hashtable)tItr.next();
+				for(int i=0;i<colNames.size();i++){
+					String key=colNames.get(i).toString();
+					if(!colValues.get(i).equals(ht.get(key))){
+						flag=false;
+						break;
+					}
+				}
+				if(flag){
+					tItr.remove();
+				}
+			}
+			p.setTuples(Tuples);
+			if(p.isEmpty()){
+				t.deletePage(p.getName());
+			}
+			else{
+				t.savePageToFile(p);
+			}
+		}
+		saveTableToDisk(t);
+		//throw new DBAppException("not implemented yet");
 	}
 
 

@@ -3,6 +3,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 public class Test {
@@ -107,18 +108,33 @@ public class Test {
 			// 	e.printStackTrace();
 			// }
 			Hashtable testt=new Hashtable<>();
+			Hashtable test=new Hashtable<>();
 			testt.put("name", "zomixat");
 			testt.put("gpa", "hi");
-			try {
-				d.updateTable("Ashez.class", "5", testt);
-			} catch (DBAppException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			test.put("name", "zomixat");
+			test.put("gpa", "hi");
+			int x=5;
+			Object y=5;
+			Vector<Object> v= new Vector<>();
+			
+			v.add(1);
+			v.add("a");
+			v.add(x);
+			v.add(testt);
+			v.add(y);
+			Iterator it=v.iterator();
+			System.out.println(v);
+			while(it.hasNext()){
+				Object s=it.next();
+				if(s.equals(5)){
+					it.remove();
+				}
 			}
-			System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez1.class"));
-			System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez2.class"));
-			System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez3.class"));
-			System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez4.class"));
-			System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez5.class"));			
+			System.out.println(v);
+			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez1.class"));
+			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez2.class"));
+			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez3.class"));
+			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez4.class"));
+			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez5.class"));			
 	}
 }
