@@ -66,7 +66,7 @@ public class Page implements Serializable {
         for (int i = 0; i < tuples.size(); i++) {
             Hashtable tuple = (Hashtable) tuples.elementAt(i);
             String s=tuple.get(key).toString();
-            if(s.equals(o.toString())){
+            if(s.equals(o.toString()){
                 return i;
             }  
             
