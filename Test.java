@@ -1,3 +1,6 @@
+import ds.bplus.bptree.BPlusTree;
+import ds.bplus.util.InvalidBTreeStateException;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -123,18 +126,35 @@ public class Test {
 			v.add(testt);
 			v.add(y);
 			Iterator it=v.iterator();
-			System.out.println(v);
-			while(it.hasNext()){
-				Object s=it.next();
-				if(s.equals(5)){
-					it.remove();
-				}
-			}
-			System.out.println(v);
+//			System.out.println(v);
+//			while(it.hasNext()){
+//				Object s=it.next();
+//				if(s.equals(5)){
+//					it.remove();
+//				}
+//			}
+//			System.out.println(v);
 			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez1.class"));
 			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez2.class"));
 			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez3.class"));
 			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez4.class"));
-			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez5.class"));			
+			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez5.class"));
+		BPlusTree b;
+
+		{
+			try {
+				b = new BPlusTree();
+				b.insertKey(0, "aby", false);
+				
+
+			} catch (IOException | InvalidBTreeStateException e) {
+				throw new RuntimeException(e);
+			}
 	}
+
+
+    }
+
+
+
 }

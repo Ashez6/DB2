@@ -1,3 +1,3 @@
-ashez,gpa,java.lang.double,False,GPAindex,B+tree
-ashez,name,java.lang.String,False,null,null
-ashez,id,java.lang.Integer,True,null,null
+Ashez,gpa,java.lang.Double,False,null,null
+Ashez,name,java.lang.String,False,null,null
+Ashez,id,java.lang.Integer,True,null,null
