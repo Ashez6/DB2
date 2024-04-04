@@ -1,9 +1,9 @@
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.*;
 
+@SuppressWarnings({"rawtypes"})
 public class Page implements Serializable {
     String name;
     int N;
@@ -66,7 +66,7 @@ public class Page implements Serializable {
         for (int i = 0; i < tuples.size(); i++) {
             Hashtable tuple = (Hashtable) tuples.elementAt(i);
             String s=tuple.get(key).toString();
-            if(s.equals(o.toString()){
+            if(s.equals(o.toString())){
                 return i;
             }  
             

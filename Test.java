@@ -1,11 +1,9 @@
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
+
+import ds.bplus.bptree.BPlusTree;
+import ds.bplus.util.InvalidBTreeStateException;
+@SuppressWarnings({"rawtypes","unchecked",})
 public class Test {
 
 
@@ -89,52 +87,25 @@ public class Test {
 			tup8.put("gpa", Double.valueOf( 0.95 ) );
 
 			DBApp d = new DBApp();
-			// try {
-			// 	d.createTable("Ashez", "id", htblColNameType);
-			// } catch (DBAppException e) {
-			// 	// TODO Auto-generated catch block
-			// 	e.printStackTrace();
-			// }
-			// try {
-			// 	d.deleteTableFile("Ashez.class");
-			// } catch (DBAppException e) {
-			// 	// TODO Auto-generated catch block
-			// 	e.printStackTrace();
-			// }
-			// try {
-			// 	d.insertIntoTable("Ashez.class", tup3);
-			// } catch (DBAppException e) {
-			// 	// TODO Auto-generated catch block
-			// 	e.printStackTrace();
-			// }
-			Hashtable testt=new Hashtable<>();
-			Hashtable test=new Hashtable<>();
-			testt.put("name", "zomixat");
-			testt.put("gpa", "hi");
-			test.put("name", "zomixat");
-			test.put("gpa", "hi");
-			int x=5;
-			Object y=5;
-			Vector<Object> v= new Vector<>();
-			
-			v.add(1);
-			v.add("a");
-			v.add(x);
-			v.add(testt);
-			v.add(y);
-			Iterator it=v.iterator();
-			System.out.println(v);
-			while(it.hasNext()){
-				Object s=it.next();
-				if(s.equals(5)){
-					it.remove();
-				}
+			try {
+				BPlusTree b=new BPlusTree();
+				b.printTree();
+				b.insertKey(1, "aby", false);
+				b.insertKey(4, "ehab", false);
+				b.insertKey(7, "bobs", false);
+				b.insertKey(3, "zeina", false);
+				b.printTree();
+				BPlusTree b2=new BPlusTree();
+				b2.insertKey(1, "sam", false);
+				b2.insertKey(4, "hazem", false);
+				
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidBTreeStateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			System.out.println(v);
-			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez1.class"));
-			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez2.class"));
-			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez3.class"));
-			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez4.class"));
-			// System.out.println(d.loadTableFromDisk("Ashez.class").loadPageFromFile("Ashez5.class"));			
 	}
 }

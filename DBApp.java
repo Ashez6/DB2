@@ -1,13 +1,16 @@
 
 /** * @author Wael Abouelsaadat */
 
-import resources.bplustree;
+
 
 
 import java.io.*;
 import java.util.*;
 
+import ds.bplus.bptree.BPlusTree;
+import ds.bplus.util.InvalidBTreeStateException;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 public class DBApp {
 
 
@@ -119,12 +122,29 @@ public class DBApp {
 				throw new DBAppException("temp file not renamed");
 			}
 
-
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+		try {
+			BPlusTree b=new BPlusTree();
+			Table t=loadTableFromDisk(strTableName);
+			for(String page:t.getPageNames()){
+				Page p=t.loadPageFromFile(page+".class");
+				for(Object o:p.getTuples()){
+					Hashtable ht=(Hashtable)o;
+					Object key=ht.get(strColName);
+					b.insertKey(key, page, true);
+				}
+			}
+			saveTree(b, strTableName+strIndexName);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidBTreeStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-//		throw new DBAppException("not implemented yet");
 	}
 
 
@@ -132,7 +152,8 @@ public class DBApp {
 	// htblColNameValue must include a value for the primary key
 	public void insertIntoTable(String strTableName,
 								Hashtable<String,Object>  htblColNameValue) throws DBAppException{
-		boolean hasIndex=false;
+		Vector<String> indexName=new Vector<String>();
+		Vector<String> indexColumn=new Vector<String>();
 		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
 		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
 		FileReader fr;
@@ -150,7 +171,8 @@ public class DBApp {
 							throw new DBAppException("Invalid input datatypes.");
 						}
 						if(!arr[4].equals("null")){
-							hasIndex=true;
+							indexName.add(arr[4]);
+							indexColumn.add(arr[1]);
 						}
 					}
 					else{
@@ -164,17 +186,24 @@ public class DBApp {
 			e.printStackTrace();
 		}
 
-		if(hasIndex){
-			//TODO call insert using index
+		//TODO binary search insertion using clustering key
+		String pageName=linearInsert(strTableName, htblColNameValue);
+		for(int i=0;i<indexName.size();i++){
+			BPlusTree b=loadTree(strTableName+indexName.get(i));
+			try {
+				b.insertKey(htblColNameValue.get(indexColumn.get(i)), pageName, true);
+			} catch (NumberFormatException  | IllegalStateException | IOException | InvalidBTreeStateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+			saveTree(b, strTableName+indexName.get(i));
 		}
-		else{
-			linearInsert(strTableName, htblColNameValue);
-		}
+		
 
 		//throw new DBAppException("not implemented yet");
 	}
 
-	public void linearInsert(String strTableName,
+	public String linearInsert(String strTableName,
 		Hashtable<String,Object>  htblColNameValue){
 		Table t = loadTableFromDisk(strTableName);
 		
@@ -184,7 +213,7 @@ public class DBApp {
 			p.insert(htblColNameValue);
 			t.savePageToFile(p);
 			saveTableToDisk(t);
-			return;
+			return p.name;
 		}
 		String targetPage=null;
 		String ckey=t.getCKey();
@@ -208,7 +237,7 @@ public class DBApp {
 			p.insert(htblColNameValue);
 			t.savePageToFile(p);
 		    saveTableToDisk(t);
-			return;
+			return p.name;
 		}
 		p =t.loadPageFromFile(targetPage);
 
@@ -252,6 +281,7 @@ public class DBApp {
 		}
 		t.savePageToFile(p);
 		saveTableToDisk(t);
+		return p.name;
 
 	}
 	// following method updates one row only
@@ -261,7 +291,8 @@ public class DBApp {
 	public void updateTable(String strTableName,
 							String strClusteringKeyValue,
 							Hashtable<String,Object> htblColNameValue   )  throws DBAppException{
-		boolean hasIndex=false;
+		Vector<String> indexName=new Vector<String>();
+		Vector<String> indexColumn=new Vector<String>();
 		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
 		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
 		FileReader fr;
@@ -273,11 +304,12 @@ public class DBApp {
 				String[] arr= line.split(",");
 				if((arr[0]+".class").equals(strTableName)){
 					int index=colNames.indexOf(arr[1]);
-					if(!arr[4].equals("null")){
-						hasIndex=true;
-					}
 					if(index==-1){
 						continue;
+					}
+					if(!arr[4].equals("null")){
+						indexName.add(arr[4]);
+						indexColumn.add(arr[1]);
 					}
 					String type=colValues.get(index).getClass().getName();
 					if(!type.equals(arr[2])){
@@ -293,29 +325,41 @@ public class DBApp {
 
 		Table t=loadTableFromDisk(strTableName);
 		String ckey=t.getCKey();
-		if(hasIndex){
-			//TODO call update using index
-		}
-		else{
-			Page p=null;
-			outerloop : for (int i = 0; i < t.getPageNames().size(); i++) {
-				String pagename = t.getPageNames().elementAt(i);
-				p =t.loadPageFromFile(pagename);
-				Vector<Object> v=p.getTuples();
-				for(int j=0;j<v.size();j++){
-					Hashtable<String,Object> ht=(Hashtable<String,Object>)v.elementAt(j);
-					if(strClusteringKeyValue.equals(ht.get(ckey).toString())){
-						for(int k=0;k<colNames.size();k++){
-							ht.put(colNames.get(k).toString(),colValues.get(k));
-						}
-						v.setElementAt(ht, j);
-						p.setTuples(v);
-						break outerloop;
+		//TODO binary search update using clustering key
+		Page p=null;
+		Vector<Object> oldKeys=new Vector<>();
+		outerloop : for (int i = 0; i < t.getPageNames().size(); i++) {
+			String pagename = t.getPageNames().elementAt(i);
+			p =t.loadPageFromFile(pagename);
+			Vector<Object> v=p.getTuples();
+			for(int j=0;j<v.size();j++){
+				Hashtable<String,Object> ht=(Hashtable<String,Object>)v.elementAt(j);
+				if(strClusteringKeyValue.equals(ht.get(ckey).toString())){
+					for(String s:indexColumn){
+						oldKeys.add(ht.get(s));
 					}
+					for(int k=0;k<colNames.size();k++){
+						ht.put(colNames.get(k).toString(),colValues.get(k));
+					}
+					v.setElementAt(ht, j);
+					p.setTuples(v);
+					break outerloop;
 				}
 			}
-			t.savePageToFile(p);
 		}
+		t.savePageToFile(p);
+		for(int i=0;i<indexName.size();i++){
+			BPlusTree b=loadTree(strTableName+indexName.get(i));
+			try {
+				b.deleteKey(oldKeys.get(i), false);
+				b.insertKey(htblColNameValue.get(indexColumn.get(i)), p.name, true);
+			} catch (NumberFormatException  | IllegalStateException | IOException | InvalidBTreeStateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+			saveTree(b, strTableName+indexName.get(i));
+		}
+		
 		//throw new DBAppException("not implemented yet");
 	}
 
@@ -333,6 +377,32 @@ public class DBApp {
 		Iterator<Object> tItr;
 		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
 		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
+		Vector<String> indexName=new Vector<String>();
+		Vector<String> indexColumn=new Vector<String>();
+		
+		FileReader fr;
+		try {
+			fr = new FileReader("metadata.csv");
+			BufferedReader br = new BufferedReader(fr);
+			String line ;
+			while((line = br.readLine()) != null){
+				String[] arr= line.split(",");
+				if((arr[0]+".class").equals(strTableName)){
+					int index=colNames.indexOf(arr[1]);
+					if(index==-1){
+						continue;
+					}
+					if(!arr[4].equals("null")){
+						indexName.add(arr[4]);
+						indexColumn.add(arr[1]);
+					}
+				}
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		while(pItr.hasNext()){
 			p=t.loadPageFromFile(pItr.next());
 			Vector<Object> Tuples=p.getTuples();
@@ -348,6 +418,16 @@ public class DBApp {
 					}
 				}
 				if(flag){
+					for(int i=0;i<indexName.size();i++){
+						BPlusTree b=loadTree(strTableName+indexName.get(i));
+						try {
+							b.deleteKey(ht.get(indexColumn.get(i)), false);
+						} catch (NumberFormatException  | IllegalStateException | IOException | InvalidBTreeStateException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} 
+						saveTree(b, strTableName+indexName.get(i));
+					}
 					tItr.remove();
 				}
 			}
@@ -373,7 +453,7 @@ public class DBApp {
 	public Table loadTableFromDisk(String s){
 		Table t=null;
 		try {
-			FileInputStream fileIn = new FileInputStream(s);
+			FileInputStream fileIn = new FileInputStream(s+".class");
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 			t = (Table) in.readObject();
 			in.close();
@@ -401,10 +481,11 @@ public class DBApp {
 	}
 
 	public void deleteTableFile(String s) throws DBAppException{
-		File file = new File(s);
+		File file = new File(s+".class");
 		if (file.exists()) {
 			Table t=loadTableFromDisk(s);
 			Vector<String> temp=new Vector<String>();
+			Vector<String> trees=new Vector<String>();
 			for(String name : t.getPageNames()){
 				temp.add(name);
 			}
@@ -421,7 +502,10 @@ public class DBApp {
 				File tmpFile = null;
 				while((line = br.readLine()) != null){
 					String[] lineValues = line.split(",");
-					if((lineValues[0] + ".class").equals(s)){
+					if((lineValues[0] + ".class").equals(s+".class")){
+						if(!lineValues[4].equals("null")){
+							trees.add(lineValues[4]);
+						}
 						tmpFile = deleteLine(metadata, lineValues[0]);
 					}
 				}
@@ -439,6 +523,10 @@ public class DBApp {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			for(String tree:trees){
+				file=new File(tree);
+				file.delete();
+			}
 		} else {
 			throw new DBAppException("Table file not found: " + s);
 		}
@@ -446,6 +534,38 @@ public class DBApp {
 
 
 	}
+
+	public BPlusTree loadTree(String s){
+		BPlusTree t=null;
+		try {
+			FileInputStream fileIn = new FileInputStream(s+".class");
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			t = (BPlusTree) in.readObject();
+			in.close();
+			fileIn.close();
+		} catch (IOException i) {
+			i.printStackTrace();
+		} catch (ClassNotFoundException c) {
+			System.out.println("Tree not found");
+			c.printStackTrace();
+		}
+		return t;
+	}
+
+	public void saveTree(BPlusTree t,String indexName){
+		try {
+			FileOutputStream fileOut = new FileOutputStream(indexName+".class");
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(t);
+			out.close();
+			fileOut.close();
+		} catch (IOException i) {
+			i.printStackTrace();
+			return;
+		}
+	}
+
+
 
 
 	// helper method to delete lines
