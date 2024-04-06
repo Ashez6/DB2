@@ -7,7 +7,7 @@
 import java.io.*;
 import java.util.*;
 
-import resources.*;
+import resources.BPTree.*;
 
 @SuppressWarnings({"rawtypes","unchecked"})
 public class DBApp {

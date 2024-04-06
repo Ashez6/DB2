@@ -117,17 +117,21 @@ public class Test {
 				System.out.println(b);
 				d.insertIntoTable("City", tup6);
 				t=d.loadTableFromDisk("City");
-				b.insert(6, b.insertRef(6,4,"City",false));
+				Ref Rtup6 =  b.insertRef(6,4,"City",false);
+				b.insert(6, Rtup6);
 				System.out.println(t);
 				System.out.println(b);
-				System.out.println(b.search(1));
-				System.out.println(b.search(2));
-				System.out.println(b.search(4));
-				System.out.println(b.search(5));
-				System.out.println(b.search(6));
-				System.out.println(b.search(8));
-				d.deleteTableFile("City");
-				
+
+				b.delete(6, Rtup6);
+				System.out.println(t);
+				System.out.println(b);
+//				System.out.println(b.search(1));
+//				System.out.println(b.search(2));
+//				System.out.println(b.search(4));
+//				System.out.println(b.search(5));
+//				System.out.println(b.search(6));
+//				System.out.println(b.search(8));
+
 			} catch ( DBAppException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
