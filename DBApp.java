@@ -176,7 +176,7 @@ public class DBApp {
 			String line ;
 			while((line = br.readLine()) != null){
 				String[] arr= line.split(",");
-				if((arr[0]+".class").equals(strTableName)){
+				if((arr[0]).equals(strTableName)){
 					if(colNames.contains(arr[1])){
 						int index=colNames.indexOf(arr[1]);
 						String type=colValues.get(index).getClass().getName();
@@ -201,10 +201,13 @@ public class DBApp {
 
 		//TODO binary search insertion using clustering key
 		Ref r=linearInsert(strTableName, htblColNameValue);
+		System.out.println(r);
+		System.out.println(oldrefs.toString());
+		System.out.println(newrefs.toString());
 		for(int i=0;i<indexName.size();i++){
 			BPTree b=loadTree(strTableName+indexName.get(i));
-			b.insert((Comparable)htblColNameValue.get(indexColumn.get(i)), r);
 			b.updateRefNonKey(oldrefs, newrefs);
+			b.insert((Comparable)htblColNameValue.get(indexColumn.get(i)), r);
 			saveTree(b, strTableName+indexName.get(i));
 		}
 		

@@ -88,49 +88,60 @@ public class Test {
 			DBApp d = new DBApp();
 			try {
 				d.createTable("City", "id", htblColNameType);
+				d.createIndex("City", "name", "NameTree");
 				Table t=d.loadTableFromDisk("City");
-				BPTree<Integer> b=new BPTree(2);
 				d.insertIntoTable("City", tup1);
 				t=d.loadTableFromDisk("City");
-				b.insert(1, b.insertRef(1,4,"City",true));
+				BPTree b=d.loadTree("CityNameTree");
+				//b.insert(1, b.insertRef(1,4,"City",true));
 				System.out.println(t);
 				System.out.println(b);
 				d.insertIntoTable("City", tup4);
 				t=d.loadTableFromDisk("City");
-				b.insert(4, b.insertRef(4,4,"City",false));
+				b=d.loadTree("CityNameTree");
+				//b.insert(4, b.insertRef(4,4,"City",false));
 				System.out.println(t);
 				System.out.println(b);
 				d.insertIntoTable("City", tup2);
 				t=d.loadTableFromDisk("City");
-				b.insert(2, b.insertRef(2,4,"City",false));
+				b=d.loadTree("CityNameTree");
+				//b.insert(2, b.insertRef(2,4,"City",false));
 				System.out.println(t);
 				System.out.println(b);
 				d.insertIntoTable("City", tup5);
 				t=d.loadTableFromDisk("City");
-				b.insert(5, b.insertRef(5,4,"City",false));
+				b=d.loadTree("CityNameTree");
+				//b.insert(5, b.insertRef(5,4,"City",false));
 				System.out.println(t);
 				System.out.println(b);
 				d.insertIntoTable("City", tup8);
 				t=d.loadTableFromDisk("City");
-				b.insert(8, b.insertRef(8,4,"City",false));
+				b=d.loadTree("CityNameTree");
+				//b.insert(8, b.insertRef(8,4,"City",false));
 				System.out.println(t);
 				System.out.println(b);
 				d.insertIntoTable("City", tup6);
 				t=d.loadTableFromDisk("City");
-				Ref Rtup6 =  b.insertRef(6,4,"City",false);
-				b.insert(6, Rtup6);
+				b=d.loadTree("CityNameTree");
+				//Ref Rtup6 =  b.insertRef(6,4,"City",false);
+				//b.insert(6, Rtup6);
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup7);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//b.insert(8, b.insertRef(8,4,"City",false));
 				System.out.println(t);
 				System.out.println(b);
 
-				b.delete(6, Rtup6);
-				System.out.println(t);
-				System.out.println(b);
-//				System.out.println(b.search(1));
-//				System.out.println(b.search(2));
-//				System.out.println(b.search(4));
-//				System.out.println(b.search(5));
-//				System.out.println(b.search(6));
-//				System.out.println(b.search(8));
+				System.out.println(b.search("Aby"));
+				System.out.println(b.search("bobs"));
+				System.out.println(b.search("ehab"));
+				System.out.println(b.search("hazem"));
+				System.out.println(b.search("mohamed"));
+				System.out.println(b.search("sam"));
+				System.out.println(b.search("zeina"));
+
 
 			} catch ( DBAppException e) {
 				// TODO Auto-generated catch block
