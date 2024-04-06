@@ -7,8 +7,7 @@
 import java.io.*;
 import java.util.*;
 
-import ds.bplus.bptree.BPlusTree;
-import ds.bplus.util.InvalidBTreeStateException;
+import resources.*;
 
 @SuppressWarnings({"rawtypes","unchecked"})
 public class DBApp {
@@ -125,25 +124,25 @@ public class DBApp {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		try {
-			BPlusTree b=new BPlusTree();
-			Table t=loadTableFromDisk(strTableName);
-			for(String page:t.getPageNames()){
-				Page p=t.loadPageFromFile(page+".class");
-				for(Object o:p.getTuples()){
-					Hashtable ht=(Hashtable)o;
-					Object key=ht.get(strColName);
-					b.insertKey(key, page, true);
-				}
-			}
-			saveTree(b, strTableName+strIndexName);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidBTreeStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// try {
+		// 	BPlusTree b=new BPlusTree();
+		// 	Table t=loadTableFromDisk(strTableName);
+		// 	for(String page:t.getPageNames()){
+		// 		Page p=t.loadPageFromFile(page+".class");
+		// 		for(Object o:p.getTuples()){
+		// 			Hashtable ht=(Hashtable)o;
+		// 			Object key=ht.get(strColName);
+		// 			b.insertKey(key, page, true);
+		// 		}
+		// 	}
+		// 	saveTree(b, strTableName+strIndexName);
+		// } catch (IOException e) {
+		// 	// TODO Auto-generated catch block
+		// 	e.printStackTrace();
+		// } catch (InvalidBTreeStateException e) {
+		// 	// TODO Auto-generated catch block
+		// 	e.printStackTrace();
+		// }
 
 	}
 
@@ -188,16 +187,16 @@ public class DBApp {
 
 		//TODO binary search insertion using clustering key
 		String pageName=linearInsert(strTableName, htblColNameValue);
-		for(int i=0;i<indexName.size();i++){
-			BPlusTree b=loadTree(strTableName+indexName.get(i));
-			try {
-				b.insertKey(htblColNameValue.get(indexColumn.get(i)), pageName, true);
-			} catch (NumberFormatException  | IllegalStateException | IOException | InvalidBTreeStateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			saveTree(b, strTableName+indexName.get(i));
-		}
+		// for(int i=0;i<indexName.size();i++){
+		// 	BPlusTree b=loadTree(strTableName+indexName.get(i));
+		// 	try {
+		// 		b.insertKey(htblColNameValue.get(indexColumn.get(i)), pageName, true);
+		// 	} catch (NumberFormatException  | IllegalStateException | IOException | InvalidBTreeStateException e) {
+		// 		// TODO Auto-generated catch block
+		// 		e.printStackTrace();
+		// 	} 
+		// 	saveTree(b, strTableName+indexName.get(i));
+		// }
 		
 
 		//throw new DBAppException("not implemented yet");
@@ -348,17 +347,17 @@ public class DBApp {
 			}
 		}
 		t.savePageToFile(p);
-		for(int i=0;i<indexName.size();i++){
-			BPlusTree b=loadTree(strTableName+indexName.get(i));
-			try {
-				b.deleteKey(oldKeys.get(i), false);
-				b.insertKey(htblColNameValue.get(indexColumn.get(i)), p.name, true);
-			} catch (NumberFormatException  | IllegalStateException | IOException | InvalidBTreeStateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			saveTree(b, strTableName+indexName.get(i));
-		}
+		// for(int i=0;i<indexName.size();i++){
+		// 	BPlusTree b=loadTree(strTableName+indexName.get(i));
+		// 	try {
+		// 		b.deleteKey(oldKeys.get(i), false);
+		// 		b.insertKey(htblColNameValue.get(indexColumn.get(i)), p.name, true);
+		// 	} catch (NumberFormatException  | IllegalStateException | IOException | InvalidBTreeStateException e) {
+		// 		// TODO Auto-generated catch block
+		// 		e.printStackTrace();
+		// 	} 
+		// 	saveTree(b, strTableName+indexName.get(i));
+		// }
 		
 		//throw new DBAppException("not implemented yet");
 	}
@@ -418,16 +417,16 @@ public class DBApp {
 					}
 				}
 				if(flag){
-					for(int i=0;i<indexName.size();i++){
-						BPlusTree b=loadTree(strTableName+indexName.get(i));
-						try {
-							b.deleteKey(ht.get(indexColumn.get(i)), false);
-						} catch (NumberFormatException  | IllegalStateException | IOException | InvalidBTreeStateException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} 
-						saveTree(b, strTableName+indexName.get(i));
-					}
+					// for(int i=0;i<indexName.size();i++){
+					// 	BPlusTree b=loadTree(strTableName+indexName.get(i));
+					// 	try {
+					// 		b.deleteKey(ht.get(indexColumn.get(i)), false);
+					// 	} catch (NumberFormatException  | IllegalStateException | IOException | InvalidBTreeStateException e) {
+					// 		// TODO Auto-generated catch block
+					// 		e.printStackTrace();
+					// 	} 
+					// 	saveTree(b, strTableName+indexName.get(i));
+					// }
 					tItr.remove();
 				}
 			}
@@ -502,9 +501,9 @@ public class DBApp {
 				File tmpFile = null;
 				while((line = br.readLine()) != null){
 					String[] lineValues = line.split(",");
-					if((lineValues[0] + ".class").equals(s+".class")){
+					if((lineValues[0]).equals(s)){
 						if(!lineValues[4].equals("null")){
-							trees.add(lineValues[4]);
+							trees.add(s+lineValues[4]+".class");
 						}
 						tmpFile = deleteLine(metadata, lineValues[0]);
 					}
@@ -535,35 +534,35 @@ public class DBApp {
 
 	}
 
-	public BPlusTree loadTree(String s){
-		BPlusTree t=null;
-		try {
-			FileInputStream fileIn = new FileInputStream(s+".class");
-			ObjectInputStream in = new ObjectInputStream(fileIn);
-			t = (BPlusTree) in.readObject();
-			in.close();
-			fileIn.close();
-		} catch (IOException i) {
-			i.printStackTrace();
-		} catch (ClassNotFoundException c) {
-			System.out.println("Tree not found");
-			c.printStackTrace();
-		}
-		return t;
-	}
+	// public BPlusTree loadTree(String s){
+	// 	BPlusTree t=null;
+	// 	try {
+	// 		FileInputStream fileIn = new FileInputStream(s+".class");
+	// 		ObjectInputStream in = new ObjectInputStream(fileIn);
+	// 		t = (BPlusTree) in.readObject();
+	// 		in.close();
+	// 		fileIn.close();
+	// 	} catch (IOException i) {
+	// 		i.printStackTrace();
+	// 	} catch (ClassNotFoundException c) {
+	// 		System.out.println("Tree not found");
+	// 		c.printStackTrace();
+	// 	}
+	// 	return t;
+	// }
 
-	public void saveTree(BPlusTree t,String indexName){
-		try {
-			FileOutputStream fileOut = new FileOutputStream(indexName+".class");
-			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(t);
-			out.close();
-			fileOut.close();
-		} catch (IOException i) {
-			i.printStackTrace();
-			return;
-		}
-	}
+	// public void saveTree(BPlusTree t,String indexName){
+	// 	try {
+	// 		FileOutputStream fileOut = new FileOutputStream(indexName+".class");
+	// 		ObjectOutputStream out = new ObjectOutputStream(fileOut);
+	// 		out.writeObject(t);
+	// 		out.close();
+	// 		fileOut.close();
+	// 	} catch (IOException i) {
+	// 		i.printStackTrace();
+	// 		return;
+	// 	}
+	// }
 
 
 

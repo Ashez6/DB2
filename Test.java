@@ -1,8 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-import ds.bplus.bptree.BPlusTree;
-import ds.bplus.util.InvalidBTreeStateException;
+import resources.BPTree.*;
 @SuppressWarnings({"rawtypes","unchecked",})
 public class Test {
 
@@ -45,7 +44,7 @@ public class Test {
 			htblColNameValue.put("gpa", Double.valueOf( 0.95 ) );
 
 			Hashtable tup1 = new Hashtable( );
-			tup1.put("id", Integer.valueOf( 0 ));
+			tup1.put("id", Integer.valueOf( 1 ));
 			tup1.put("name", new String("Aby" ) );
 			tup1.put("gpa", Double.valueOf( 0.95 ) );
 
@@ -83,29 +82,57 @@ public class Test {
 
 			Hashtable tup8 = new Hashtable( );
 			tup8.put("id", Integer.valueOf( 8 ));
-			tup8.put("name", new String("ahmed" ) );
+			tup8.put("name", new String("sam" ) );
 			tup8.put("gpa", Double.valueOf( 0.95 ) );
 
 			DBApp d = new DBApp();
 			try {
-				BPlusTree b=new BPlusTree();
-				b.printTree();
-				b.insertKey(1, "aby", false);
-				b.insertKey(4, "ehab", false);
-				b.insertKey(7, "bobs", false);
-				b.insertKey(3, "zeina", false);
-				b.printTree();
-				BPlusTree b2=new BPlusTree();
-				b2.insertKey(1, "sam", false);
-				b2.insertKey(4, "hazem", false);
+				d.createTable("City", "id", htblColNameType);
+				Table t=d.loadTableFromDisk("City");
+				BPTree<Integer> b=new BPTree(2);
+				d.insertIntoTable("City", tup1);
+				t=d.loadTableFromDisk("City");
+				b.insert(1, b.insertRef(1,4,"City",true));
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup4);
+				t=d.loadTableFromDisk("City");
+				b.insert(4, b.insertRef(4,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup2);
+				t=d.loadTableFromDisk("City");
+				b.insert(2, b.insertRef(2,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup5);
+				t=d.loadTableFromDisk("City");
+				b.insert(5, b.insertRef(5,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup8);
+				t=d.loadTableFromDisk("City");
+				b.insert(8, b.insertRef(8,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup6);
+				t=d.loadTableFromDisk("City");
+				b.insert(6, b.insertRef(6,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
+				System.out.println(b.search(1));
+				System.out.println(b.search(2));
+				System.out.println(b.search(4));
+				System.out.println(b.search(5));
+				System.out.println(b.search(6));
+				System.out.println(b.search(8));
+				d.deleteTableFile("City");
 				
-
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvalidBTreeStateException e) {
+			} catch ( DBAppException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
+			
 	}
 }

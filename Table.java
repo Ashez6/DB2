@@ -91,4 +91,13 @@ public class Table implements Serializable{
       }
     }
 
+    public String toString(){
+        String s="";
+        for(String name:pageNames){
+            Page p=loadPageFromFile(name);
+            s+=p.toString()+"\n";
+        }
+        return s;
+    }
+
 }
