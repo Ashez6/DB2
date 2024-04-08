@@ -100,13 +100,31 @@ public class Page implements Serializable {
         while(min<=max){
             mid=(max+min)/2;
             Hashtable tuple = (Hashtable) tuples.elementAt(mid);
-            String s=tuple.get(ckey).toString();
-            if(s.compareTo(o.toString())>=0){
-              res= mid;
-              max=mid-1;
+            Object s=tuple.get(ckey);
+            if(o instanceof String){
+                if(s.toString().compareTo(o.toString())>=0){
+                    res= mid;
+                    max=mid-1;
+                  }
+                  else
+                    min=mid+1;
             }
-            else
-              min=mid+1;
+            else if (o instanceof Integer){
+                if((Integer)s>=(Integer)o){
+                    res= mid;
+                    max=mid-1;
+                  }
+                  else
+                    min=mid+1;
+            }
+            else{
+                if((Double)s>=(Double)o){
+                    res= mid;
+                    max=mid-1;
+                  }
+                  else
+                    min=mid+1;
+            }
         }
         return res;
     }

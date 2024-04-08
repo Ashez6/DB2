@@ -340,7 +340,7 @@ public class DBApp {
 			String line ;
 			while((line = br.readLine()) != null){
 				String[] arr= line.split(",");
-				if((arr[0]+".class").equals(strTableName)){
+				if((arr[0]).equals(strTableName)){
 					int index=colNames.indexOf(arr[1]);
 					if(index==-1){
 						continue;
@@ -366,6 +366,7 @@ public class DBApp {
 		//TODO binary search update using clustering key
 		Page p=null;
 		Vector<Object> oldKeys=new Vector<>();
+		Vector<Ref> Refs=new Vector<>();
 		outerloop : for (int i = 0; i < t.getPageNames().size(); i++) {
 			String pagename = t.getPageNames().elementAt(i);
 			p =t.loadPageFromFile(pagename);
@@ -375,6 +376,7 @@ public class DBApp {
 				if(strClusteringKeyValue.equals(ht.get(ckey).toString())){
 					for(String s:indexColumn){
 						oldKeys.add(ht.get(s));
+						Refs.add(new Ref(p.getName(), j));
 					}
 					for(int k=0;k<colNames.size();k++){
 						ht.put(colNames.get(k).toString(),colValues.get(k));
@@ -386,18 +388,12 @@ public class DBApp {
 			}
 		}
 		t.savePageToFile(p);
-		// for(int i=0;i<indexName.size();i++){
-		// 	BPlusTree b=loadTree(strTableName+indexName.get(i));
-		// 	try {
-		// 		b.deleteKey(oldKeys.get(i), false);
-		// 		b.insertKey(htblColNameValue.get(indexColumn.get(i)), p.name, true);
-		// 	} catch (NumberFormatException  | IllegalStateException | IOException | InvalidBTreeStateException e) {
-		// 		// TODO Auto-generated catch block
-		// 		e.printStackTrace();
-		// 	} 
-		// 	saveTree(b, strTableName+indexName.get(i));
-		// }
-		
+		for(int i=0;i<indexName.size();i++){
+			BPTree b=loadTree(strTableName+indexName.get(i));
+			b.update((Comparable)oldKeys.get(i),(Comparable)htblColNameValue.get(indexColumn.get(i)), Refs.get(i), Refs.get(i));
+			saveTree(b, strTableName+indexName.get(i));
+		}
+		saveTableToDisk(t);
 		//throw new DBAppException("not implemented yet");
 	}
 
@@ -425,7 +421,7 @@ public class DBApp {
 			String line ;
 			while((line = br.readLine()) != null){
 				String[] arr= line.split(",");
-				if((arr[0]+".class").equals(strTableName)){
+				if((arr[0]).equals(strTableName)){
 					int index=colNames.indexOf(arr[1]);
 					if(index==-1){
 						continue;
@@ -445,9 +441,13 @@ public class DBApp {
 			p=t.loadPageFromFile(pItr.next());
 			Vector<Object> Tuples=p.getTuples();
 			tItr=Tuples.iterator();
+			int j=-1;
+			int del=0;
+			int size=p.getTuples().size();
 			while(tItr.hasNext()){
 				boolean flag=true;
 				Hashtable ht=(Hashtable)tItr.next();
+				j++;
 				for(int i=0;i<colNames.size();i++){
 					String key=colNames.get(i).toString();
 					if(!colValues.get(i).equals(ht.get(key))){
@@ -456,17 +456,20 @@ public class DBApp {
 					}
 				}
 				if(flag){
-					// for(int i=0;i<indexName.size();i++){
-					// 	BPlusTree b=loadTree(strTableName+indexName.get(i));
-					// 	try {
-					// 		b.deleteKey(ht.get(indexColumn.get(i)), false);
-					// 	} catch (NumberFormatException  | IllegalStateException | IOException | InvalidBTreeStateException e) {
-					// 		// TODO Auto-generated catch block
-					// 		e.printStackTrace();
-					// 	} 
-					// 	saveTree(b, strTableName+indexName.get(i));
-					// }
+					for(int i=0;i<indexName.size();i++){
+						BPTree b=loadTree(strTableName+indexName.get(i));
+						b.delete((Comparable)ht.get(indexColumn.get(i)), new Ref(p.getName(),j-del));
+						for(int k=j+1;k<size;k++){
+							oldrefs.add(new Ref(p.getName(), k-del));
+							newrefs.add(new Ref(p.getName(), k-1-del));
+						}
+						b.updateRefNonKey(oldrefs, newrefs);
+						saveTree(b, strTableName+indexName.get(i));
+					}
+					
 					tItr.remove();
+					size--;
+					del++;
 				}
 			}
 			p.setTuples(Tuples);

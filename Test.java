@@ -72,7 +72,14 @@ public class Test {
 			tup6.put("id", Integer.valueOf( 6 ));
 			tup6.put("name", new String("hazem" ) );
 			tup6.put("gpa", Double.valueOf( 0.95 ) );
-
+			Hashtable tup6a = new Hashtable( );
+			tup6a.put("id", Integer.valueOf( 9 ));
+			tup6a.put("name", new String("hazem" ) );
+			tup6a.put("gpa", Double.valueOf( 2 ) );
+			Hashtable tup6b = new Hashtable( );
+			tup6b.put("id", Integer.valueOf( 10 ));
+			tup6b.put("name", new String("hazem" ) );
+			tup6b.put("gpa", Double.valueOf( 1 ) );
 
 			Hashtable tup7 = new Hashtable( );
 			tup7.put("id", Integer.valueOf( 7 ));
@@ -90,10 +97,24 @@ public class Test {
 				d.createTable("City", "id", htblColNameType);
 				d.createIndex("City", "name", "NameTree");
 				Table t=d.loadTableFromDisk("City");
+				BPTree b=d.loadTree("CityNameTree");
+				d.insertIntoTable("City", tup8);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//b.insert(8, b.insertRef(8,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
 				d.insertIntoTable("City", tup1);
 				t=d.loadTableFromDisk("City");
-				BPTree b=d.loadTree("CityNameTree");
+				b=d.loadTree("CityNameTree");
 				//b.insert(1, b.insertRef(1,4,"City",true));
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup6);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//Ref Rtup6 =  b.insertRef(6,4,"City",false);
+				//b.insert(6, Rtup6);
 				System.out.println(t);
 				System.out.println(b);
 				d.insertIntoTable("City", tup4);
@@ -114,34 +135,54 @@ public class Test {
 				//b.insert(5, b.insertRef(5,4,"City",false));
 				System.out.println(t);
 				System.out.println(b);
-				d.insertIntoTable("City", tup8);
+				
+				d.insertIntoTable("City", tup6a);
 				t=d.loadTableFromDisk("City");
 				b=d.loadTree("CityNameTree");
+				//Ref Rtup6 =  b.insertRef(6,4,"City",false);
+				//b.insert(6, Rtup6);
+				// System.out.println(t);
+				// System.out.println(b);
+				// d.insertIntoTable("City", tup7);
+				// t=d.loadTableFromDisk("City");
+				// b=d.loadTree("CityNameTree");
 				//b.insert(8, b.insertRef(8,4,"City",false));
 				System.out.println(t);
 				System.out.println(b);
-				d.insertIntoTable("City", tup6);
+				d.insertIntoTable("City", tup6b);
 				t=d.loadTableFromDisk("City");
 				b=d.loadTree("CityNameTree");
 				//Ref Rtup6 =  b.insertRef(6,4,"City",false);
 				//b.insert(6, Rtup6);
 				System.out.println(t);
 				System.out.println(b);
-				d.insertIntoTable("City", tup7);
+
+				System.out.println(b.searchDuplicates("Aby"));
+				System.out.println(b.searchDuplicates("bobs"));
+				System.out.println(b.searchDuplicates("ehab"));
+				//System.out.println(b.searchDuplicates("mohamed"));
+				System.out.println(b.searchDuplicates("sam"));
+				System.out.println(b.searchDuplicates("hazem"));
+				System.out.println(b.searchDuplicates("zeina"));
+
+				Hashtable tup9 = new Hashtable( );
+				tup9.put("name", new String("hazem" ) );
+				tup9.put("gpa", Double.valueOf( 2 ) );
+				d.deleteFromTable("City", tup9);
 				t=d.loadTableFromDisk("City");
 				b=d.loadTree("CityNameTree");
-				//b.insert(8, b.insertRef(8,4,"City",false));
 				System.out.println(t);
 				System.out.println(b);
 
-				System.out.println(b.search("Aby"));
-				System.out.println(b.search("bobs"));
-				System.out.println(b.search("ehab"));
-				System.out.println(b.search("hazem"));
-				System.out.println(b.search("mohamed"));
-				System.out.println(b.search("sam"));
-				System.out.println(b.search("zeina"));
+				System.out.println(b.searchDuplicates("Aby"));
+				System.out.println(b.searchDuplicates("bobs"));
+				System.out.println(b.searchDuplicates("ehab"));
+				System.out.println(b.searchDuplicates("hazem"));
+				System.out.println(b.searchDuplicates("mohamed"));
+				System.out.println(b.searchDuplicates("sam"));
+				System.out.println(b.searchDuplicates("zeina"));
 
+				//System.out.println(b.searchDuplicates("hoba3"));
 
 			} catch ( DBAppException e) {
 				// TODO Auto-generated catch block
