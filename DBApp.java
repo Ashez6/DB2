@@ -488,14 +488,17 @@ public class DBApp {
 	public Iterator selectFromTable(SQLTerm[] arrSQLTerms,
 									String[]  strarrOperators) throws DBAppException{
 
-		if(arrSQLTerms.length != strarrOperators.length + 1){
-			throw new DBAppException("incompatible length of terms with operators");
+		if(strarrOperators != null){
+			if(arrSQLTerms.length != strarrOperators.length + 1){
+				throw new DBAppException("incompatible length of terms with operators");
+			}
 		}
-		
+
 		int nterms=arrSQLTerms.length;
 		Vector<Hashtable>[] results=new Vector[nterms];
 		
 		for(int i=0;i<nterms;i++){
+			results[i] = new Vector<>();
 			String indexName=null;
 			FileReader fr;
 			try {
@@ -530,17 +533,20 @@ public class DBApp {
 				switch (arrSQLTerms[i]._strOperator) {
 					case ">":
 						l=b.searchGreaterthan(key);
-						for (int j = 0; j < l.getNumberOfKeys(); j++) {
-							if (l.getKey(j).compareTo(key) > 0 ) {
-								refs.add(l.getRecord(j));
-								refs.addAll(l.getOverflow(j));
+						if(l != null) {
+							for (int j = 0; j < l.getNumberOfKeys(); j++) {
+								if (l.getKey(j).compareTo(key) > 0) {
+									refs.add(l.getRecord(j));
+
+									if (l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
+								}
 							}
+							l = l.getNext();
 						}
-						l=l.getNext();
 						while(l!=null){
 							for (int j = 0; j < l.getNumberOfKeys(); j++) {
 									refs.add(l.getRecord(j));
-									refs.addAll(l.getOverflow(j));
+								if(l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
 							}
 							l=l.getNext();
 						}
@@ -548,17 +554,19 @@ public class DBApp {
 					
 					case ">=":
 						l=b.searchGreaterEqual(key);
-						for (int j = 0; j < l.getNumberOfKeys(); j++) {
-							if (l.getKey(j).compareTo(key) >= 0 ) {
-								refs.add(l.getRecord(j));
-								refs.addAll(l.getOverflow(j));
+						if(l != null) {
+							for (int j = 0; j < l.getNumberOfKeys(); j++) {
+								if (l.getKey(j).compareTo(key) >= 0) {
+									refs.add(l.getRecord(j));
+									if (l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
+								}
 							}
+							l = l.getNext();
 						}
-						l=l.getNext();
 						while(l!=null){
 							for (int j = 0; j < l.getNumberOfKeys(); j++) {
 									refs.add(l.getRecord(j));
-									refs.addAll(l.getOverflow(j));
+								if(l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
 							}
 							l=l.getNext();
 						}
@@ -567,18 +575,21 @@ public class DBApp {
 					case "<":
 						l=b.searchMinNode();
 						limit=b.searchGreaterEqual(key);
-						while(!l.equals(limit)){
-							for (int j = 0; j < l.getNumberOfKeys(); j++) {
+
+						if(limit != null) {
+							while (!l.equals(limit)) {
+								for (int j = 0; j < l.getNumberOfKeys(); j++) {
 									refs.add(l.getRecord(j));
-									refs.addAll(l.getOverflow(j));
+									if (l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
+								}
+								l = l.getNext();
 							}
-							l=l.getNext();
-						}
-						
-						for (int j = 0; j < limit.getNumberOfKeys(); j++) {
-							if (limit.getKey(j).compareTo(key) < 0 ) {
-								refs.add(limit.getRecord(j));
-								refs.addAll(l.getOverflow(j));
+
+							for (int j = 0; j < limit.getNumberOfKeys(); j++) {
+								if (limit.getKey(j).compareTo(key) < 0) {
+									refs.add(limit.getRecord(j));
+									if (l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
+								}
 							}
 						}
 						break;
@@ -586,20 +597,33 @@ public class DBApp {
 					case "<=":
 						l=b.searchMinNode();
 						limit=b.searchGreaterthan(key);
-						while(!l.equals(limit)){
-							for (int j = 0; j < l.getNumberOfKeys(); j++) {
-									refs.add(l.getRecord(j));
-									refs.addAll(l.getOverflow(j));
+
+						if(limit != null){
+							while(!limit.equals(l)){
+								for (int j = 0; j < l.getNumberOfKeys(); j++) {
+										refs.add(l.getRecord(j));
+									if(l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
+								}
+								l=l.getNext();
 							}
-							l=l.getNext();
+							for (int j = 0; j < limit.getNumberOfKeys(); j++) {
+								if (limit.getKey(j).compareTo(key) <= 0 ) {
+									refs.add(limit.getRecord(j));
+									if(l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
+								}
+							}
+						}
+						else{
+							while(l != null){
+								for (int j = 0; j < l.getNumberOfKeys(); j++) {
+									refs.add(l.getRecord(j));
+									if(l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
+								}
+								l=l.getNext();
+							}
 						}
 						
-						for (int j = 0; j < limit.getNumberOfKeys(); j++) {
-							if (limit.getKey(j).compareTo(key) <= 0 ) {
-								refs.add(limit.getRecord(j));
-								refs.addAll(l.getOverflow(j));
-							}
-						}
+
 						break;
 
 					case "=":
@@ -663,11 +687,12 @@ public class DBApp {
 
 		}
 
-			Set<Hashtable> output = new HashSet<>(results[0]);
+			LinkedHashSet<Hashtable> output = new LinkedHashSet<>(results[0]);
 
+		if(strarrOperators != null) {
 			for (int i = 0; i < strarrOperators.length; i++) {
 
-				Set<Hashtable> operand = new HashSet<>((results[i + 1]));
+				LinkedHashSet<Hashtable> operand = new LinkedHashSet<>((results[i + 1]));
 
 
 				switch (strarrOperators[i]) {
@@ -693,31 +718,52 @@ public class DBApp {
 						// Union difference 1 and difference 2 and place in output
 
 						differenceSet1.addAll(differenceSet2);
-						output = new HashSet<>(differenceSet1);
+						output = new LinkedHashSet<>(differenceSet1);
 
 						break;
 				}
 			}
+		}
 			Iterator oi = output.iterator();
 			ArrayList<String> al = new ArrayList<>();
 			while(oi.hasNext()){
-				al.add(printTuple((Hashtable) oi.next()));
+				Tuple t = new Tuple((Hashtable) oi.next());
+				al.add(t.toString());
 			}
 		
 		return al.iterator();
 	}
 
-	public String printTuple(Hashtable ht) {
-        Object[] arr = ht.values().toArray();
-        String s = "";
-        for (int i = arr.length - 1; i >= 0; i--) {
-            s += "" + arr[i];
-            if (i != 0) {
-                s += ",";
-            }
-        }
-        return s;
-    }
+
+
+	public LinkedHashSet sortSet(LinkedHashSet<Hashtable> lhs, Comparable clusteringKey){
+
+		Hashtable[] arr = (Hashtable[]) lhs.toArray();
+
+		if (arr == null || arr.length <= 1) {
+			return lhs;
+		}
+		int n = arr.length;
+		boolean swapped;
+
+		for (int i = 0; i < n - 1; i++) {
+			swapped = false;
+			for (int j = 0; j < n - i - 1; j++) {
+				if (((Comparable)arr[j].get(clusteringKey)).compareTo(arr[j + 1].get(clusteringKey)) > 0) {
+					// Swap arr[j] and arr[j + 1]
+					Hashtable temp = arr[j];
+					arr[j] = arr[j + 1];
+					arr[j + 1] = temp;
+					swapped = true;
+				}
+			}
+			if (!swapped) {
+				break; // If no swaps occurred, the array is already sorted
+			}
+		}
+
+        return new LinkedHashSet<>(List.of(arr));
+	}
 
 	public Table loadTableFromDisk(String s){
 		Table t=null;

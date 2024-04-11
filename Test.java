@@ -92,160 +92,138 @@ public class Test {
 			tup8.put("name", new String("sam" ) );
 			tup8.put("gpa", Double.valueOf( 0.95 ) );
 
-//			DBApp d = new DBApp();
-//			try {
-//				d.createTable("City", "id", htblColNameType);
-//				d.createIndex("City", "name", "NameTree");
-//				Table t=d.loadTableFromDisk("City");
-//				BPTree b=d.loadTree("CityNameTree");
-//				d.insertIntoTable("City", tup8);
-//				t=d.loadTableFromDisk("City");
-//				b=d.loadTree("CityNameTree");
-//				//b.insert(8, b.insertRef(8,4,"City",false));
-//				System.out.println(t);
-//				System.out.println(b);
-//				d.insertIntoTable("City", tup1);
-//				t=d.loadTableFromDisk("City");
-//				b=d.loadTree("CityNameTree");
-//				//b.insert(1, b.insertRef(1,4,"City",true));
-//				System.out.println(t);
-//				System.out.println(b);
-//				d.insertIntoTable("City", tup6);
-//				t=d.loadTableFromDisk("City");
-//				b=d.loadTree("CityNameTree");
-//				//Ref Rtup6 =  b.insertRef(6,4,"City",false);
-//				//b.insert(6, Rtup6);
-//				System.out.println(t);
-//				System.out.println(b);
-//				d.insertIntoTable("City", tup4);
-//				t=d.loadTableFromDisk("City");
-//				b=d.loadTree("CityNameTree");
-//				//b.insert(4, b.insertRef(4,4,"City",false));
-//				System.out.println(t);
-//				System.out.println(b);
-//				d.insertIntoTable("City", tup2);
-//				t=d.loadTableFromDisk("City");
-//				b=d.loadTree("CityNameTree");
-//				//b.insert(2, b.insertRef(2,4,"City",false));
-//				System.out.println(t);
-//				System.out.println(b);
-//				d.insertIntoTable("City", tup5);
-//				t=d.loadTableFromDisk("City");
-//				b=d.loadTree("CityNameTree");
-//				//b.insert(5, b.insertRef(5,4,"City",false));
-//				System.out.println(t);
-//				System.out.println(b);
-//
-//				d.insertIntoTable("City", tup6a);
-//				t=d.loadTableFromDisk("City");
-//				b=d.loadTree("CityNameTree");
-//				//Ref Rtup6 =  b.insertRef(6,4,"City",false);
-//				//b.insert(6, Rtup6);
-//				// System.out.println(t);
-//				// System.out.println(b);
-//				// d.insertIntoTable("City", tup7);
-//				// t=d.loadTableFromDisk("City");
-//				// b=d.loadTree("CityNameTree");
-//				//b.insert(8, b.insertRef(8,4,"City",false));
-//				System.out.println(t);
-//				System.out.println(b);
-//				d.insertIntoTable("City", tup6b);
-//				t=d.loadTableFromDisk("City");
-//				b=d.loadTree("CityNameTree");
-//				//Ref Rtup6 =  b.insertRef(6,4,"City",false);
-//				//b.insert(6, Rtup6);
-//				System.out.println(t);
-//				System.out.println(b);
-//
-//				System.out.println(b.searchDuplicates("Aby"));
-//				System.out.println(b.searchDuplicates("bobs"));
-//				System.out.println(b.searchDuplicates("ehab"));
-//				//System.out.println(b.searchDuplicates("mohamed"));
-//				System.out.println(b.searchDuplicates("sam"));
-//				System.out.println(b.searchDuplicates("hazem"));
-//				System.out.println(b.searchDuplicates("zeina"));
-//
-//				Hashtable tup9 = new Hashtable( );
-//				tup9.put("name", new String("hazem" ) );
-//				tup9.put("gpa", Double.valueOf( 2 ) );
-//				d.deleteFromTable("City", tup9);
-//				t=d.loadTableFromDisk("City");
-//				b=d.loadTree("CityNameTree");
-//				System.out.println(t);
-//				System.out.println(b);
-//
-//				System.out.println(b.searchDuplicates("Aby"));
-//				System.out.println(b.searchDuplicates("bobs"));
-//				System.out.println(b.searchDuplicates("ehab"));
-//				System.out.println(b.searchDuplicates("hazem"));
-//				System.out.println(b.searchDuplicates("mohamed"));
-//				System.out.println(b.searchDuplicates("sam"));
-//				System.out.println(b.searchDuplicates("zeina"));
-//
-//				//System.out.println(b.searchDuplicates("hoba3"));
-//
-//			} catch ( DBAppException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			DBApp d = new DBApp();
+			try {
+				d.createTable("City", "id", htblColNameType);
+				d.createIndex("City", "name", "NameTree");
+				Table t=d.loadTableFromDisk("City");
+				BPTree b=d.loadTree("CityNameTree");
+				d.insertIntoTable("City", tup8);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//b.insert(8, b.insertRef(8,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup1);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//b.insert(1, b.insertRef(1,4,"City",true));
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup6);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//Ref Rtup6 =  b.insertRef(6,4,"City",false);
+				//b.insert(6, Rtup6);
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup4);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//b.insert(4, b.insertRef(4,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup2);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//b.insert(2, b.insertRef(2,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup5);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//b.insert(5, b.insertRef(5,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
 
-			Vector<Hashtable>[] res=new Vector[3];
-			res[0] = new Vector<>();
-			res[0].add(tup1);
-			res[0].add(tup2);
-			res[1] = new Vector<>();
-			res[1].add(tup5);
-			res[1].add(tup3);
-			res[1].add(tup2);
+				d.insertIntoTable("City", tup6a);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//Ref Rtup6 =  b.insertRef(6,4,"City",false);
+				//b.insert(6, Rtup6);
+				// System.out.println(t);
+				// System.out.println(b);
+				// d.insertIntoTable("City", tup7);
+				// t=d.loadTableFromDisk("City");
+				// b=d.loadTree("CityNameTree");
+				//b.insert(8, b.insertRef(8,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
+				d.insertIntoTable("City", tup6b);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//Ref Rtup6 =  b.insertRef(6,4,"City",false);
+				//b.insert(6, Rtup6);
+				System.out.println(t);
+				System.out.println(b);
 
-			String[] strarrOperators = new String[1];
+				System.out.println(b.searchDuplicates("Aby"));
+				System.out.println(b.searchDuplicates("bobs"));
+				System.out.println(b.searchDuplicates("ehab"));
+				//System.out.println(b.searchDuplicates("mohamed"));
+				System.out.println(b.searchDuplicates("sam"));
+				System.out.println(b.searchDuplicates("hazem"));
+				System.out.println(b.searchDuplicates("zeina"));
 
-			strarrOperators[0] = "XOR";
+				Hashtable tup9 = new Hashtable( );
+				tup9.put("name", new String("hazem" ) );
+				tup9.put("gpa", Double.valueOf( 2 ) );
+				//d.deleteFromTable("City", tup9);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				System.out.println(t);
+				System.out.println(b);
 
+				System.out.println(b.searchDuplicates("Aby"));
+				System.out.println(b.searchDuplicates("bobs"));
+				System.out.println(b.searchDuplicates("ehab"));
+				System.out.println(b.searchDuplicates("hazem"));
+				System.out.println(b.searchDuplicates("mohamed"));
+				System.out.println(b.searchDuplicates("sam"));
+				System.out.println(b.searchDuplicates("zeina"));
 
-		Set<Hashtable> output = new HashSet<>(res[0]);
+				//System.out.println(b.searchDuplicates("hoba3"));
 
-		for (int i = 0; i < strarrOperators.length; i++) {
-
-			Set<Hashtable> operand = new HashSet<>((res[i + 1]));
-
-
-			switch (strarrOperators[i]) {
-				case "OR":
-					output.addAll(operand);
-					break;
-
-				case "AND":
-					output.retainAll(operand);
-					break;
-
-				case "XOR":
-					// in A and not in B
-					Set<Hashtable> differenceSet1;
-					differenceSet1 = new HashSet<>(output);
-					differenceSet1.removeAll(operand);
-
-					// in B and not in A
-					Set<Hashtable> differenceSet2;
-					differenceSet2 = new HashSet<>(operand);
-					differenceSet2.removeAll(output);
-
-					// Union difference 1 and difference 2 and place in output
-
-					differenceSet1.addAll(differenceSet2);
-					output = new HashSet<>(differenceSet1);
-
-					break;
+			} catch ( DBAppException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		}
-		Iterator oi = output.iterator();
-		ArrayList<String> al = new ArrayList<>();
-		while(oi.hasNext()){
-			al.add(printTuple( (Hashtable) oi.next()));
-		}
 
-		Iterator fin = al.iterator();
-		while (fin.hasNext()){
+			SQLTerm[] arrSQLTerms;
+			arrSQLTerms = new SQLTerm[3];
+			arrSQLTerms[0] = new SQLTerm();
+			arrSQLTerms[0]._strTableName =  "City";
+			arrSQLTerms[0]._strColumnName=  "id";
+			arrSQLTerms[0]._strOperator  =  ">";
+			arrSQLTerms[0]._objValue     = Integer.valueOf(3);
+
+			arrSQLTerms[1] = new SQLTerm();
+			arrSQLTerms[1]._strTableName =  "City";
+			arrSQLTerms[1]._strColumnName=  "name";
+			arrSQLTerms[1]._strOperator  =  "<";
+			arrSQLTerms[1]._objValue     = "sam";
+
+			arrSQLTerms[2] = new SQLTerm();
+			arrSQLTerms[2]._strTableName =  "City";
+			arrSQLTerms[2]._strColumnName=  "gpa";
+			arrSQLTerms[2]._strOperator  =  "<";
+			arrSQLTerms[2]._objValue     = Double.valueOf(1);
+
+			String[]strarrOperators = new String[2];
+			strarrOperators[0] = "AND";
+			strarrOperators[1] = "AND";
+
+
+
+
+
+		Iterator fin = null;
+        try {
+            fin = d.selectFromTable(arrSQLTerms, strarrOperators );
+        } catch (DBAppException e) {
+            throw new RuntimeException(e);
+        }
+        while (fin.hasNext()){
 			System.out.println(fin.next());
 		}
 	}
