@@ -1,11 +1,10 @@
 package resources.BPTree;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Vector;
 
 @SuppressWarnings({"rawtypes","unchecked"})
-public class BPTreeLeafNode<T extends Comparable<T>> extends BPTreeNode<T> implements Serializable {
+public class BPTreeLeafNode<T extends Comparable<T>> extends BPTreeNode<T> {
 
 	/**
 	 * 
@@ -15,7 +14,6 @@ public class BPTreeLeafNode<T extends Comparable<T>> extends BPTreeNode<T> imple
 	ArrayList<Vector<Ref>> overflow;
 	private BPTreeLeafNode<T> next;
 
-	@SuppressWarnings("unchecked")
 	public BPTreeLeafNode(int n) {
 		super(n);
 		keys = new Comparable[n];

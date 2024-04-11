@@ -487,9 +487,198 @@ public class DBApp {
 
 	public Iterator selectFromTable(SQLTerm[] arrSQLTerms,
 									String[]  strarrOperators) throws DBAppException{
+		
+		int nterms=arrSQLTerms.length;
+		Vector<Hashtable>[] results=new Vector[nterms];
+		
+		for(int i=0;i<nterms;i++){
+			String indexName=null;
+			FileReader fr;
+			try {
+				fr = new FileReader("metadata.csv");
+				BufferedReader br = new BufferedReader(fr);
+				String line ;
+				while((line = br.readLine()) != null){
+					String[] arr= line.split(",");
+					if((arr[0]).equals(arrSQLTerms[i]._strTableName) && (arr[1]).equals(arrSQLTerms[i]._strColumnName)){
+						String type=arrSQLTerms[i]._objValue.getClass().getName();
+						if(!type.equals(arr[2])){
+							throw new DBAppException("Invalid search datatypes.");
+						}
+						if(!arr[4].equals("null")){
+							indexName=arr[4];
+						}
+						break;
+					}
+				}
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
+			Comparable key=(Comparable)arrSQLTerms[i]._objValue;
+			Table t=loadTableFromDisk(arrSQLTerms[i]._strTableName);
+			if(indexName!=null && !arrSQLTerms[i]._strOperator.equals("!=")){
+				BPTree b=loadTree(arrSQLTerms[i]._strTableName+indexName);
+				Vector<Ref> refs=new Vector();
+				BPTreeLeafNode l;
+				BPTreeLeafNode limit;
+				switch (arrSQLTerms[i]._strOperator) {
+					case ">":
+						l=b.searchGreaterthan(key);
+						for (int j = 0; j < l.getNumberOfKeys(); j++) {
+							if (l.getKey(j).compareTo(key) > 0 ) {
+								refs.add(l.getRecord(j));
+								refs.addAll(l.getOverflow(j));
+							}
+						}
+						l=l.getNext();
+						while(l!=null){
+							for (int j = 0; j < l.getNumberOfKeys(); j++) {
+									refs.add(l.getRecord(j));
+									refs.addAll(l.getOverflow(j));
+							}
+							l=l.getNext();
+						}
+						break;
+					
+					case ">=":
+						l=b.searchGreaterEqual(key);
+						for (int j = 0; j < l.getNumberOfKeys(); j++) {
+							if (l.getKey(j).compareTo(key) >= 0 ) {
+								refs.add(l.getRecord(j));
+								refs.addAll(l.getOverflow(j));
+							}
+						}
+						l=l.getNext();
+						while(l!=null){
+							for (int j = 0; j < l.getNumberOfKeys(); j++) {
+									refs.add(l.getRecord(j));
+									refs.addAll(l.getOverflow(j));
+							}
+							l=l.getNext();
+						}
+						break;
+					
+					case "<":
+						l=b.searchMinNode();
+						limit=b.searchGreaterEqual(key);
+						while(!l.equals(limit)){
+							for (int j = 0; j < l.getNumberOfKeys(); j++) {
+									refs.add(l.getRecord(j));
+									refs.addAll(l.getOverflow(j));
+							}
+							l=l.getNext();
+						}
+						
+						for (int j = 0; j < limit.getNumberOfKeys(); j++) {
+							if (limit.getKey(j).compareTo(key) < 0 ) {
+								refs.add(limit.getRecord(j));
+								refs.addAll(l.getOverflow(j));
+							}
+						}
+						break;
+					
+					case "<=":
+						l=b.searchMinNode();
+						limit=b.searchGreaterthan(key);
+						while(!l.equals(limit)){
+							for (int j = 0; j < l.getNumberOfKeys(); j++) {
+									refs.add(l.getRecord(j));
+									refs.addAll(l.getOverflow(j));
+							}
+							l=l.getNext();
+						}
+						
+						for (int j = 0; j < limit.getNumberOfKeys(); j++) {
+							if (limit.getKey(j).compareTo(key) <= 0 ) {
+								refs.add(limit.getRecord(j));
+								refs.addAll(l.getOverflow(j));
+							}
+						}
+						break;
+
+					case "=":
+						refs.addAll(b.searchDuplicates(key));
+						break;
+				
+					default: throw new DBAppException("Invalid operator");
+				}
+				
+				for(Ref r:refs){
+					Page p=t.loadPageFromFile(r.getPage());
+					Hashtable ht=(Hashtable)p.getTuples().get(r.getIndexInPage());
+					results[i].add(ht);
+				}
+				
+			}
+			else{
+				for(String pname:t.pageNames){
+					Page p=t.loadPageFromFile(pname);
+					for(Object o : p.getTuples()){
+						Hashtable ht=(Hashtable)o;
+						Comparable val=(Comparable)ht.get(arrSQLTerms[i]._strColumnName);
+						switch (arrSQLTerms[i]._strOperator) {
+							case ">":
+								if(val.compareTo(key)>0)
+									results[i].add(ht);
+								break;
+							
+							case ">=":
+								if(val.compareTo(key)>=0)
+									results[i].add(ht);
+								break;
+							
+							case "<":
+								if(val.compareTo(key)<0)
+									results[i].add(ht);
+								break;
+							
+							case "<=":
+								if(val.compareTo(key)<=0)
+									results[i].add(ht);
+								break;
+		
+							case "=":
+								if(val.compareTo(key)==0)
+									results[i].add(ht);
+								break;
+							
+							case "!=":
+								if(val.compareTo(key)!=0)
+									results[i].add(ht);
+								break;
+						
+							default: throw new DBAppException("Invalid operator");
+						}
+
+
+					}
+				}
+			}
+
+		}
+
+		// for(int i=0;i<nterms;i++){
+
+		// }
+		// Set<Vector<Hashtable>> s= new HashSet<>(Arrays.asList(results[i]));
+		
+		
 		return null;
 	}
+
+	public String printTuple(Hashtable ht) {
+        Object[] arr = ht.values().toArray();
+        String s = "";
+        for (int i = arr.length - 1; i >= 0; i--) {
+            s += "" + arr[i];
+            if (i != 0) {
+                s += ",";
+            }
+        }
+        return s;
+    }
 
 	public Table loadTableFromDisk(String s){
 		Table t=null;

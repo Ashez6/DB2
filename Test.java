@@ -189,6 +189,12 @@ public class Test {
 				e.printStackTrace();
 			}
 
-			
+			Vector<Hashtable>[] res=new Vector[3];
+			res[0].add(tup1);
+			res[0].add(tup2);
+			res[1].add(tup5);
+			res[1].add(tup3);
+			res[2].add(tup7);
+			res[2].add(tup6);
 	}
 }

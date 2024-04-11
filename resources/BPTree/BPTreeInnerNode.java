@@ -1,10 +1,9 @@
 package resources.BPTree;
 
-import java.io.Serializable;
-import java.util.ArrayList;
+
 
 @SuppressWarnings({"rawtypes","unchecked"})
-public class BPTreeInnerNode<T extends Comparable<T>> extends BPTreeNode<T> implements Serializable {
+public class BPTreeInnerNode<T extends Comparable<T>> extends BPTreeNode<T>{
 	/**
 	 * 
 	 */
@@ -16,7 +15,6 @@ public class BPTreeInnerNode<T extends Comparable<T>> extends BPTreeNode<T> impl
 	 * 
 	 * @param n
 	 */
-	@SuppressWarnings("unchecked")
 	public BPTreeInnerNode(int n) {
 		super(n);
 		keys = new Comparable[n];
@@ -103,7 +101,6 @@ public class BPTreeInnerNode<T extends Comparable<T>> extends BPTreeNode<T> impl
 	 * @param pushup key to be pushed up to the parent in case of splitting.
 	 * @return Inner node after splitting
 	 */
-	@SuppressWarnings("unchecked")
 	public BPTreeInnerNode<T> split(PushUp<T> pushup) {
 		int keyIndex = this.findIndex((T) pushup.key);
 		int midIndex = numberOfKeys / 2 - 1;
