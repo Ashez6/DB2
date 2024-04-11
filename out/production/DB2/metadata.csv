@@ -1,3 +1,6 @@
 Ashez,gpa,java.lang.Double,False,null,null
 Ashez,name,java.lang.String,False,null,null
 Ashez,id,java.lang.Integer,True,null,null
+City,gpa,java.lang.Double,False,null,null
+City,name,java.lang.String,False,NameTree,B+tree
+City,id,java.lang.Integer,True,null,null

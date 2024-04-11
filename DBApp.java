@@ -487,6 +487,10 @@ public class DBApp {
 
 	public Iterator selectFromTable(SQLTerm[] arrSQLTerms,
 									String[]  strarrOperators) throws DBAppException{
+
+		if(arrSQLTerms.length != strarrOperators.length + 1){
+			throw new DBAppException("incompatible length of terms with operators");
+		}
 		
 		int nterms=arrSQLTerms.length;
 		Vector<Hashtable>[] results=new Vector[nterms];
@@ -659,13 +663,48 @@ public class DBApp {
 
 		}
 
-		// for(int i=0;i<nterms;i++){
+			Set<Hashtable> output = new HashSet<>(results[0]);
 
-		// }
-		// Set<Vector<Hashtable>> s= new HashSet<>(Arrays.asList(results[i]));
+			for (int i = 0; i < strarrOperators.length; i++) {
+
+				Set<Hashtable> operand = new HashSet<>((results[i + 1]));
+
+
+				switch (strarrOperators[i]) {
+					case "OR":
+						output.addAll(operand);
+						break;
+
+					case "AND":
+						output.retainAll(operand);
+						break;
+
+					case "XOR":
+						// in A and not in B
+						Set<Hashtable> differenceSet1;
+						differenceSet1 = new HashSet<>(output);
+						differenceSet1.removeAll(operand);
+
+						// in B and not in A
+						Set<Hashtable> differenceSet2;
+						differenceSet2 = new HashSet<>(operand);
+						differenceSet2.removeAll(output);
+
+						// Union difference 1 and difference 2 and place in output
+
+						differenceSet1.addAll(differenceSet2);
+						output = new HashSet<>(differenceSet1);
+
+						break;
+				}
+			}
+			Iterator oi = output.iterator();
+			ArrayList<String> al = new ArrayList<>();
+			while(oi.hasNext()){
+				al.add(printTuple((Hashtable) oi.next()));
+			}
 		
-		
-		return null;
+		return al.iterator();
 	}
 
 	public String printTuple(Hashtable ht) {
