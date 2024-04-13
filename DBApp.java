@@ -762,7 +762,7 @@ public class DBApp {
 			}
 		}
 
-        return new LinkedHashSet<>(List.of(arr));
+        return new LinkedHashSet<>(Arrays.asList(arr));
 	}
 
 	public Table loadTableFromDisk(String s){
