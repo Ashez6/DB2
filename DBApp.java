@@ -142,7 +142,7 @@ public class DBApp {
 			break;
 			case "java.lang.Integer": b=new BPTree<Integer>(n);
 			break;
-			case "java.lang.double": b=new BPTree<Double>(n);
+			case "java.lang.Double": b=new BPTree<Double>(n);
 			break;
 			default: throw new DBAppException("Unsupported datatype");
 		}
@@ -199,11 +199,7 @@ public class DBApp {
 			e.printStackTrace();
 		}
 
-		//TODO binary search insertion using clustering key
-		Ref r=linearInsert(strTableName, htblColNameValue);
-		System.out.println(r);
-		System.out.println(oldrefs.toString());
-		System.out.println(newrefs.toString());
+		Ref r=insertHelper(strTableName, htblColNameValue);
 		for(int i=0;i<indexName.size();i++){
 			BPTree b=loadTree(strTableName+indexName.get(i));
 			b.updateRefNonKey(oldrefs, newrefs);
@@ -212,49 +208,36 @@ public class DBApp {
 		}
 		
 
-		//throw new DBAppException("not implemented yet");
 	}
 
-	public Ref linearInsert(String strTableName,
+	public Ref insertHelper(String strTableName,
 		Hashtable<String,Object>  htblColNameValue){
+		
 		Table t = loadTableFromDisk(strTableName);
+		String ckey=t.getCKey();
+		Object value=htblColNameValue.get(ckey);
 		
 		if(t.getNPages()==0){
 			t.createPage();
 			Page p=t.loadPageFromFile(t.getPageNames().lastElement());
 			p.insert(htblColNameValue);
+			Vector<Object> pMin=new Vector<>();
+			pMin.add(value);
+			Vector<Object> pMax=new Vector<>();
+			pMax.add(value);
+			t.setMinVector(pMin);
+			t.setMaxVector(pMax);
 			t.savePageToFile(p);
 			saveTableToDisk(t);
 			return new Ref(p.getName(),0);
 		}
-		String targetPage=null;
-		String ckey=t.getCKey();
-		Object value=htblColNameValue.get(ckey);
-		for (int i = 0; i < t.getPageNames().size(); i++) {
-            String pagename = t.getPageNames().elementAt(i);
-            Page p =t.loadPageFromFile(pagename);
-            if(p.getInsertLoc(ckey, value)!=-1){
-                targetPage=pagename;
-				break;
-            }
-        }
-		Page p;
-		if(targetPage==null){
-			targetPage=t.getPageNames().lastElement();
-			p =t.loadPageFromFile(targetPage);
-			int loc=p.getTuples().size();
-			if(p.isFull()){
-				t.createPage();
-				p=t.loadPageFromFile(t.getPageNames().lastElement());
-				loc=0;
-			}
-			p.insert(htblColNameValue);
-			t.savePageToFile(p);
-		    saveTableToDisk(t);
-			return new Ref(p.getName(),loc);
-		}
-		p =t.loadPageFromFile(targetPage);
+
+		int targetpage= BinaryPageSearch(t.getMinVector(), t.getMaxVector(), value);
+		Page p=t.loadPageFromFile(t.getPageNames().get(targetpage));
 		int index=p.getInsertLoc(ckey, value);
+		Vector<Object> pMin=t.getMinVector();
+		Vector<Object> pMax=t.getMaxVector();
+
 		if(!p.isFull()){
 			Vector<Object> v=p.getTuples();
 			for(int i=index;i<p.getTuples().size();i++){
@@ -265,11 +248,20 @@ public class DBApp {
 			for(int i=index+1;i<p.getTuples().size();i++){
 				newrefs.add(new Ref(p.getName(), i));
 			}
+
+			if(((Comparable)value).compareTo(pMin.get(targetpage))<0){
+				t.setPageMin(targetpage, value);
+			}
+			else if(((Comparable)value).compareTo(pMax.get(targetpage))>0){
+				t.setPageMax(targetpage, value);
+			}
 		}
 		else{
-			int currPage=t.getPageNames().indexOf(p.getName());
+			int currPage=targetpage;
+			boolean flag=false;
 			if(t.getPageNames().lastElement().equals(p.getName())){
 				t.createPage();
+				flag=true;
 			}
 			String tempName=t.getPageNames().get(++currPage);
 			Page tempPage=t.loadPageFromFile(tempName);
@@ -285,7 +277,12 @@ public class DBApp {
 				newrefs.add(new Ref(p.getName(), i));
 			}
 			newrefs.add(new Ref(tempName, 0));
+
+			Object newMax=((Hashtable)p.getLastTuple()).get(ckey);
+			t.setPageMax(currPage-1, newMax);
 			Object first=last;
+			Object newMin=((Hashtable)first).get(ckey);
+
 			while(tempPage.isFull()){
 				last=tempPage.getLastTuple();
 				for(int i=0;i<tempPage.getTuples().size();i++){
@@ -299,10 +296,15 @@ public class DBApp {
 					newrefs.add(new Ref(tempPage.getName(), i));
 				}
 				newrefs.add(new Ref(tempName, 0));
+				t.setPageMin(currPage, newMin);
 				t.savePageToFile(tempPage);
+				newMax=((Hashtable)p.getLastTuple()).get(ckey);
+				t.setPageMax(currPage, newMax);
 				first=last;
+				newMin=((Hashtable)first).get(ckey);
 				if(t.getPageNames().lastElement().equals(tempPage.getName())){
 					t.createPage();
+					flag=true;
 				}
 				tempPage=t.loadPageFromFile(t.getPageNames().get(++currPage));
 			}
@@ -315,6 +317,10 @@ public class DBApp {
 			for(int i=1;i<tempPage.getTuples().size();i++){
 				newrefs.add(new Ref(tempPage.getName(), i));
 			}
+			t.setPageMin(currPage, newMin);
+			if(flag){
+				t.setPageMax(currPage, newMin);
+			}
 			t.savePageToFile(tempPage);
 		}
 		t.savePageToFile(p);
@@ -322,6 +328,31 @@ public class DBApp {
 		return new Ref(p.getName(),index);
 
 	}
+
+	public int BinaryPageSearch(Vector<Object> pMin,Vector<Object> pMax,Object o){
+        int max=pMin.size()-1;
+        int min=0;
+        int mid;
+        while(min<=max){
+			if(min==max){
+				return min;
+			} 
+            mid=(max+min)/2;
+            Comparable low = (Comparable) pMin.elementAt(mid);
+			Comparable high = (Comparable) pMax.elementAt(mid);
+            if((low).compareTo(o)<=0 && (high).compareTo(o)>=0)
+              return mid;
+            else if((low).compareTo(o)>0 )
+              max=mid-1;
+            else
+              min=mid+1;
+        }
+        return -1;
+    }
+
+
+
+
 	// following method updates one row only
 	// htblColNameValue holds the key and new value
 	// htblColNameValue will not include clustering key as column name
@@ -920,7 +951,7 @@ public class DBApp {
 			Hashtable htblColNameType = new Hashtable( );
 			htblColNameType.put("id", "java.lang.Integer");
 			htblColNameType.put("name", "java.lang.String");
-			htblColNameType.put("gpa", "java.lang.double");
+			htblColNameType.put("gpa", "java.lang.Double");
 			dbApp.createTable( strTableName, "id", htblColNameType );
 			dbApp.createIndex( strTableName, "gpa", "gpaIndex" );
 

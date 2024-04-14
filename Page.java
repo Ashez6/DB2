@@ -5,6 +5,7 @@ import java.util.*;
 
 @SuppressWarnings({"rawtypes"})
 public class Page implements Serializable {
+    private static final long serialVersionUID = 1L;
     String name;
     int N;
     Vector<Object> tuples = new Vector<>(N);
@@ -125,6 +126,9 @@ public class Page implements Serializable {
                   else
                     min=mid+1;
             }
+        }
+        if(res==-1){
+            return min;
         }
         return res;
     }

@@ -2,9 +2,13 @@ import java.io.*;
 import java.util.*;
 
 public class Table implements Serializable{
+    
+    private static final long serialVersionUID = 1L;
     String name;
     String cKey;
     Vector<String> pageNames = new Vector<String>();
+    Vector<Object> pageMin = new Vector<Object>();
+    Vector<Object> pageMax = new Vector<Object>();
     int NPages;
 
 
@@ -29,6 +33,14 @@ public class Table implements Serializable{
         return pageNames;
     }
 
+    public Vector<Object> getMinVector(){
+        return pageMin;
+    }
+
+    public Vector<Object> getMaxVector(){
+        return pageMax;
+    }
+
     public void setName(String s){
         this.name=s;
     }
@@ -41,12 +53,31 @@ public class Table implements Serializable{
         this.pageNames=v;
     }
 
+    public void setMinVector(Vector<Object> v){
+        this.pageMin=v;
+    }
+
+    public void setMaxVector(Vector<Object> v){
+        this.pageMax=v;
+    }
+    
+    public void setPageMin(int page,Object value){
+        pageMin.set(page, value);
+    }
+
+    public void setPageMax(int page,Object value){
+        pageMax.set(page, value);
+    }
+    
+
     public void createPage(){
         NPages++;
         String pname=name + "" + NPages + ".class";
         pageNames.add(pname);
         Page p=new Page(pname);
         savePageToFile(p);
+        pageMax.add(null);
+        pageMin.add(null);
     }
 
     public void deletePage(String s){
@@ -93,9 +124,11 @@ public class Table implements Serializable{
 
     public String toString(){
         String s="";
+        int i=0;
         for(String name:pageNames){
             Page p=loadPageFromFile(name);
-            s+=p.toString()+"\n";
+            s+=p.toString()+" Min:"+pageMin.get(i)+" Max:"+pageMax.get(i)+"\n";
+            i++;
         }
         return s;
     }
