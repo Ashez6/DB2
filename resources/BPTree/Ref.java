@@ -2,7 +2,8 @@ package resources.BPTree;
 
 import java.io.Serializable;
 
-public class Ref implements Serializable {
+@SuppressWarnings("rawtypes")
+public class Ref implements Comparable, Serializable {
 
 	/**
 	 * This class represents a pointer to the record. It is used at the leaves of
@@ -47,5 +48,35 @@ public class Ref implements Serializable {
 		String s = "";
 		s += "PageName:" + this.getFileName() + "  RowIndex:" + this.getIndexInPage();
 		return s;
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		// TODO Auto-generated method stub
+		int p1=Integer.parseInt(pageName.substring(pageName.length()-6));
+		int p2=Integer.parseInt(((Ref)o).pageName.substring(pageName.length()-6));
+		if(p1>p2){
+			return 1;
+		}else if(p1<p2){
+			return -1;
+		}else{
+			if(indexInPage>((Ref)o).indexInPage){
+				return 1;
+			}else if(indexInPage<((Ref)o).indexInPage){
+				return -1;
+			}else{
+				return 0;
+			}
+		}
+	}
+
+	public boolean equals(Object o) {
+		// TODO Auto-generated method stub
+		if(pageName.equals(((Ref)o).pageName)){
+			if(indexInPage==((Ref)o).indexInPage){
+				return true;
+			}
+		}
+		return false;
 	}
 }

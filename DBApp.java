@@ -149,7 +149,7 @@ public class DBApp {
 		
 		Table t=loadTableFromDisk(strTableName);
 		for(String page:t.getPageNames()){
-			Page p=t.loadPageFromFile(page+".class");
+			Page p=t.loadPageFromFile(page);
 			for(int i=0;i<p.getTuples().size();i++){
 				Hashtable ht=(Hashtable)p.getTuples().get(i);
 				b.insert((Comparable)ht.get(strColName), new Ref(page,i));
@@ -364,6 +364,7 @@ public class DBApp {
 		Vector<String> indexColumn=new Vector<String>();
 		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
 		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
+		String checktype=null;
 		FileReader fr;
 		try {
 			fr = new FileReader("metadata.csv");
@@ -372,6 +373,9 @@ public class DBApp {
 			while((line = br.readLine()) != null){
 				String[] arr= line.split(",");
 				if((arr[0]).equals(strTableName)){
+					if(arr[3].equals("True")){
+						checktype=arr[2];
+					}
 					int index=colNames.indexOf(arr[1]);
 					if(index==-1){
 						continue;
@@ -394,30 +398,34 @@ public class DBApp {
 
 		Table t=loadTableFromDisk(strTableName);
 		String ckey=t.getCKey();
-		//TODO binary search update using clustering key
-		Page p=null;
+		
+		//get target page
+		int target;
+		Object o=strClusteringKeyValue;
+		if(checktype.equals("java.lang.Integer")){
+			o=Integer.parseInt(strClusteringKeyValue);
+		}else if (checktype.equals("java.lang.Integer")){
+			o=Double.parseDouble(strClusteringKeyValue);
+		}
+		target=BinaryPageSearch(t.getMinVector(), t.getMaxVector(), o);
+		Page p=t.loadPageFromFile(t.getPageNames().get(target));
+
 		Vector<Object> oldKeys=new Vector<>();
 		Vector<Ref> Refs=new Vector<>();
-		outerloop : for (int i = 0; i < t.getPageNames().size(); i++) {
-			String pagename = t.getPageNames().elementAt(i);
-			p =t.loadPageFromFile(pagename);
-			Vector<Object> v=p.getTuples();
-			for(int j=0;j<v.size();j++){
-				Hashtable<String,Object> ht=(Hashtable<String,Object>)v.elementAt(j);
-				if(strClusteringKeyValue.equals(ht.get(ckey).toString())){
-					for(String s:indexColumn){
-						oldKeys.add(ht.get(s));
-						Refs.add(new Ref(p.getName(), j));
-					}
-					for(int k=0;k<colNames.size();k++){
-						ht.put(colNames.get(k).toString(),colValues.get(k));
-					}
-					v.setElementAt(ht, j);
-					p.setTuples(v);
-					break outerloop;
-				}
-			}
+
+		Vector<Object> v=p.getTuples();
+		int j=p.BinaryTupleSearch(ckey, o);
+		Hashtable<String,Object> ht=(Hashtable<String,Object>)v.elementAt(j);
+		for(String s:indexColumn){
+			oldKeys.add(ht.get(s));
+			Refs.add(new Ref(p.getName(), j));
 		}
+		for(int k=0;k<colNames.size();k++){
+			ht.put(colNames.get(k).toString(),colValues.get(k));
+		}
+		v.setElementAt(ht, j);
+		p.setTuples(v);
+		
 		t.savePageToFile(p);
 		for(int i=0;i<indexName.size();i++){
 			BPTree b=loadTree(strTableName+indexName.get(i));
@@ -425,7 +433,6 @@ public class DBApp {
 			saveTree(b, strTableName+indexName.get(i));
 		}
 		saveTableToDisk(t);
-		//throw new DBAppException("not implemented yet");
 	}
 
 
@@ -436,6 +443,7 @@ public class DBApp {
 	public void deleteFromTable(String strTableName,
 								Hashtable<String,Object> htblColNameValue) throws DBAppException{
 		Table t=loadTableFromDisk(strTableName);
+		String ckey=t.cKey;
 		Vector<String> pages=t.getPageNames();
 		Page p=null;
 		Iterator<String> pItr=pages.iterator();
@@ -444,6 +452,8 @@ public class DBApp {
 		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
 		Vector<String> indexName=new Vector<String>();
 		Vector<String> indexColumn=new Vector<String>();
+		Vector<String> allColName=new Vector<String>();
+		Vector<String> allIndexName=new Vector<String>();
 		
 		FileReader fr;
 		try {
@@ -453,11 +463,15 @@ public class DBApp {
 			while((line = br.readLine()) != null){
 				String[] arr= line.split(",");
 				if((arr[0]).equals(strTableName)){
-					int index=colNames.indexOf(arr[1]);
-					if(index==-1){
-						continue;
-					}
 					if(!arr[4].equals("null")){
+						allColName.add(arr[1]);
+						allIndexName.add(arr[4]);
+
+						int index=colNames.indexOf(arr[1]);
+						if(index==-1){
+							continue;
+						}
+
 						indexName.add(arr[4]);
 						indexColumn.add(arr[1]);
 					}
@@ -468,51 +482,112 @@ public class DBApp {
 			e.printStackTrace();
 		}
 
-		while(pItr.hasNext()){
-			p=t.loadPageFromFile(pItr.next());
-			Vector<Object> Tuples=p.getTuples();
-			tItr=Tuples.iterator();
-			int j=-1;
-			int del=0;
-			int size=p.getTuples().size();
-			while(tItr.hasNext()){
-				boolean flag=true;
-				Hashtable ht=(Hashtable)tItr.next();
-				j++;
-				for(int i=0;i<colNames.size();i++){
-					String key=colNames.get(i).toString();
-					if(!colValues.get(i).equals(ht.get(key))){
-						flag=false;
-						break;
-					}
+		if(allColName.containsAll(colNames)){
+			System.out.println("shaghal");
+			Set<Ref> intersection = new HashSet<>();
+			boolean first=true;
+			for(int i=0;i<indexName.size();i++){
+				Object key=htblColNameValue.get(indexColumn.get(i));
+				BPTree b=loadTree(strTableName+indexName.get(i));
+				ArrayList a=b.searchDuplicates((Comparable)key);
+				Set<Ref> set = new HashSet<>(a);
+				if(first){
+					intersection.addAll(set);
+					first=false;
 				}
-				if(flag){
-					for(int i=0;i<indexName.size();i++){
-						BPTree b=loadTree(strTableName+indexName.get(i));
-						b.delete((Comparable)ht.get(indexColumn.get(i)), new Ref(p.getName(),j-del));
-						for(int k=j+1;k<size;k++){
-							oldrefs.add(new Ref(p.getName(), k-del));
-							newrefs.add(new Ref(p.getName(), k-1-del));
+				else{
+					intersection.retainAll(set);
+				}
+			}
+			Vector<Ref> refs= new Vector(intersection);
+			for(int i=0;i<refs.size();i++){
+				Ref r=refs.get(i);
+				String s=r.getPage();
+				int index=r.getIndexInPage();
+				p=t.loadPageFromFile(s);
+				Hashtable ht=(Hashtable)p.getTuples().get(index);
+				for(int j=0;j<allColName.size();j++){
+					Object key=ht.get(allColName.get(j));
+					BPTree b=loadTree(strTableName+allIndexName.get(j));
+					b.delete((Comparable)key, r);
+					for(int k=index+1;k<p.getTuples().size();k++){
+						oldrefs.add(new Ref(p.getName(), k));
+						newrefs.add(new Ref(p.getName(), k-1));
+					}
+					b.updateRefNonKey(oldrefs, newrefs);
+					saveTree(b, allIndexName.get(j));
+				}
+			}
+			System.out.println(refs);
+			for(int i=0;i<refs.size();i++){
+				Ref r=refs.get(i);
+				String s=r.getPage();
+				int index=r.getIndexInPage();
+				p=t.loadPageFromFile(s);
+				p.remove(index);
+				t.setPageMax(t.pageNames.indexOf(p.getName()),((Hashtable)p.getLastTuple()).get(ckey));
+				t.setPageMin(t.pageNames.indexOf(p.getName()),((Hashtable)p.getFirstTuple()).get(ckey));
+				
+
+				if(p.isEmpty()){
+					t.deletePage(p.getName());
+				}
+				else{
+					t.savePageToFile(p);
+				}
+			}
+
+
+		}
+		else{
+			while(pItr.hasNext()){
+				p=t.loadPageFromFile(pItr.next());
+				Vector<Object> Tuples=p.getTuples();
+				tItr=Tuples.iterator();
+				int j=-1;
+				int del=0;
+				int size=p.getTuples().size();
+				while(tItr.hasNext()){
+					boolean flag=true;
+					Hashtable ht=(Hashtable)tItr.next();
+					j++;
+					for(int i=0;i<colNames.size();i++){
+						String key=colNames.get(i).toString();
+						if(!colValues.get(i).equals(ht.get(key))){
+							flag=false;
+							break;
 						}
-						b.updateRefNonKey(oldrefs, newrefs);
-						saveTree(b, strTableName+indexName.get(i));
 					}
-					
-					tItr.remove();
-					size--;
-					del++;
+					if(flag){
+						for(int i=0;i<allColName.size();i++){
+							BPTree b=loadTree(strTableName+allIndexName.get(i));
+							b.delete((Comparable)ht.get(allColName.get(i)), new Ref(p.getName(),j-del));
+							for(int k=j+1;k<size;k++){
+								oldrefs.add(new Ref(p.getName(), k-del));
+								newrefs.add(new Ref(p.getName(), k-1-del));
+							}
+							b.updateRefNonKey(oldrefs, newrefs);
+							saveTree(b, strTableName+allIndexName.get(i));
+						}
+						
+						tItr.remove();
+						size--;
+						del++;
+					}
 				}
-			}
-			p.setTuples(Tuples);
-			if(p.isEmpty()){
-				t.deletePage(p.getName());
-			}
-			else{
-				t.savePageToFile(p);
-			}
+				p.setTuples(Tuples);
+				t.setPageMax(t.pageNames.indexOf(p.getName()),((Hashtable)p.getLastTuple()).get(ckey));
+				t.setPageMin(t.pageNames.indexOf(p.getName()),((Hashtable)p.getFirstTuple()).get(ckey));
+				if(p.isEmpty()){
+					t.deletePage(p.getName());
+				}
+				else{
+					t.savePageToFile(p);
+				}
+		}
+		
 		}
 		saveTableToDisk(t);
-		//throw new DBAppException("not implemented yet");
 	}
 
 

@@ -149,6 +149,7 @@ public class Test {
 				//b.insert(8, b.insertRef(8,4,"City",false));
 				System.out.println(t);
 				System.out.println(b);
+				d.createIndex("City", "gpa", "GPATree");
 				d.insertIntoTable("City", tup6b);
 				t=d.loadTableFromDisk("City");
 				b=d.loadTree("CityNameTree");
@@ -165,10 +166,20 @@ public class Test {
 				System.out.println(b.searchDuplicates("hazem"));
 				System.out.println(b.searchDuplicates("zeina"));
 
+				Hashtable tup10 = new Hashtable( );
+				tup10.put("name", new String("hoba3" ) );
+				tup10.put("gpa", Double.valueOf( 2 ) );
+				//d.deleteFromTable("City", tup9);
+				d.updateTable("City", "4", tup10);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				System.out.println(t);
+				System.out.println(b);
+				
 				Hashtable tup9 = new Hashtable( );
 				tup9.put("name", new String("hazem" ) );
 				tup9.put("gpa", Double.valueOf( 2 ) );
-				//d.deleteFromTable("City", tup9);
+				d.deleteFromTable("City", tup9);
 				t=d.loadTableFromDisk("City");
 				b=d.loadTree("CityNameTree");
 				System.out.println(t);
@@ -177,12 +188,11 @@ public class Test {
 				System.out.println(b.searchDuplicates("Aby"));
 				System.out.println(b.searchDuplicates("bobs"));
 				System.out.println(b.searchDuplicates("ehab"));
-				System.out.println(b.searchDuplicates("hazem"));
-				System.out.println(b.searchDuplicates("mohamed"));
+				System.out.println(b.searchDuplicates("hoba3"));
 				System.out.println(b.searchDuplicates("sam"));
+				System.out.println(b.searchDuplicates("hazem"));
 				System.out.println(b.searchDuplicates("zeina"));
 
-				//System.out.println(b.searchDuplicates("hoba3"));
 
 			} catch ( DBAppException e) {
 				// TODO Auto-generated catch block

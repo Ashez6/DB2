@@ -51,6 +51,10 @@ public class Page implements Serializable {
         tuples.remove(x);
     }
 
+    public void remove(int i) {
+        tuples.remove(i);
+    }
+
     public boolean isEmpty() {
         return tuples.isEmpty();
     }
@@ -61,6 +65,10 @@ public class Page implements Serializable {
 
     public Object getLastTuple(){
         return tuples.lastElement();
+    }
+
+    public Object getFirstTuple(){
+        return tuples.get(0);
     }
 
     public int linearTupleSearch(String key,Object o){
@@ -75,6 +83,7 @@ public class Page implements Serializable {
         return -1;
     }
 
+    @SuppressWarnings("unchecked")
     public int BinaryTupleSearch(String ckey,Object o){
         int max=tuples.size()-1;
         int min=0;
@@ -82,10 +91,10 @@ public class Page implements Serializable {
         while(min<=max){
             mid=(max+min)/2;
             Hashtable tuple = (Hashtable) tuples.elementAt(mid);
-            String s=tuple.get(ckey).toString();
-            if(s.equals(o.toString()))
+            Comparable c=(Comparable)tuple.get(ckey);
+            if(c.compareTo(o)==0)
               return mid;
-            else if(s.compareTo(o.toString())>0)
+            else if(c.compareTo(o)>0)
               max=mid-1;
             else
               min=mid+1;
