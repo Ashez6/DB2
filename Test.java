@@ -32,7 +32,7 @@ public class Test {
         return result;
     }
     public static void main(String args[]) {
-       Hashtable htblColNameType = new Hashtable( );
+    		Hashtable htblColNameType = new Hashtable( );
 			htblColNameType.put("id", "java.lang.Integer");
 			htblColNameType.put("name", "java.lang.String");
 			htblColNameType.put("gpa", "java.lang.Double");
@@ -244,6 +244,7 @@ public class Test {
         while (fin.hasNext()){
 			System.out.println(fin.next());
 		}
+
 	}
 
 	public static String printTuple(Hashtable ht) {

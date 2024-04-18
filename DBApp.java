@@ -44,6 +44,32 @@ public class DBApp {
 		if(dupCheck.exists()){
 			throw new DBAppException("Table name already in use.");
 		}
+
+		Object[] arr=htblColNameType.values().toArray();
+		for(Object s:arr){
+			if(!s.toString().equals("java.lang.Integer") && !s.toString().equals("java.lang.Double")
+														 && !s.toString().equals("java.lang.String")){
+				throw new DBAppException("Invalid column datatype.");
+			}
+		}
+
+		Object[] arr2=htblColNameType.keySet().toArray();
+		boolean flag=false;
+		for(int i=0;i<arr2.length;i++){
+			if(arr2[i].toString().equals(strClusteringKeyColumn)){
+				flag=true;
+			}
+			for(int j=i+1;j<arr2.length;j++){
+				if(arr2[i].equals(arr2[j])){
+					throw new DBAppException("Duplicate column names in table.");
+				}
+			}
+		}
+
+		if(!flag){
+			throw new DBAppException("Clustering key column not found.");
+		}
+
 		Table t=new Table(strTableName, strClusteringKeyColumn);
 		saveTableToDisk(t);
 
@@ -85,6 +111,9 @@ public class DBApp {
 	public void createIndex(String   strTableName,
 							String   strColName,
 							String   strIndexName) throws DBAppException{
+		
+		boolean tableExist=false;
+		boolean columnExist=false;
 
 		File mData = new File("metadata.csv");
 		String datatype="";
@@ -100,7 +129,15 @@ public class DBApp {
 
 				String[] lineValues = line.split(",");
 
+				if(lineValues[0].equals(strTableName)){
+					tableExist=true;
+				}
+				
 				if(lineValues[1].equals(strColName) && lineValues[0].equals(strTableName)){
+					columnExist=true;
+					if(!lineValues[4].equals("null")){
+						throw new DBAppException("There is an existing index on this column.");
+					}
 					lineValues[4] = strIndexName;
 					lineValues[5] = "B+tree";
 					datatype=lineValues[2];
@@ -127,6 +164,20 @@ public class DBApp {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+
+		if(!tableExist){
+			throw new DBAppException("Table does not exist.");
+		}
+
+		if(!columnExist){
+			throw new DBAppException("Column does not exist.");
+		}
+
+		File index =new File(strTableName+strIndexName+".class");
+		if(index.exists()){
+			throw new DBAppException("Index name already exists.");
+		}
+
 		Properties properties = new Properties();
 		int n=0;
         try (FileInputStream input = new FileInputStream("resources/DBApp.config")) {
@@ -144,7 +195,7 @@ public class DBApp {
 			break;
 			case "java.lang.Double": b=new BPTree<Double>(n);
 			break;
-			default: throw new DBAppException("Unsupported datatype");
+			default: throw new DBAppException("Unsupported datatype.");
 		}
 		
 		Table t=loadTableFromDisk(strTableName);
@@ -165,10 +216,14 @@ public class DBApp {
 	// htblColNameValue must include a value for the primary key
 	public void insertIntoTable(String strTableName,
 								Hashtable<String,Object>  htblColNameValue) throws DBAppException{
+
 		Vector<String> indexName=new Vector<String>();
 		Vector<String> indexColumn=new Vector<String>();
 		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
 		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
+		int len=0;
+		boolean tableExist=false;
+
 		FileReader fr;
 		try {
 			fr = new FileReader("metadata.csv");
@@ -177,8 +232,10 @@ public class DBApp {
 			while((line = br.readLine()) != null){
 				String[] arr= line.split(",");
 				if((arr[0]).equals(strTableName)){
+					tableExist=true;
 					if(colNames.contains(arr[1])){
 						int index=colNames.indexOf(arr[1]);
+						len++;
 						String type=colValues.get(index).getClass().getName();
 						if(!type.equals(arr[2])){
 							throw new DBAppException("Invalid input datatypes.");
@@ -199,6 +256,13 @@ public class DBApp {
 			e.printStackTrace();
 		}
 
+		if(!tableExist){
+			throw new DBAppException("Table does not exist.");
+		}
+
+		if(colNames.size()!=len){
+			throw new DBAppException("Invalid column name.");
+		}
 		Ref r=insertHelper(strTableName, htblColNameValue);
 		for(int i=0;i<indexName.size();i++){
 			BPTree b=loadTree(strTableName+indexName.get(i));
@@ -363,8 +427,11 @@ public class DBApp {
 		Vector<String> indexName=new Vector<String>();
 		Vector<String> indexColumn=new Vector<String>();
 		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
+		Boolean[] colExist=new Boolean[colNames.size()];
 		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
 		String checktype=null;
+		boolean tableExist=false;
+
 		FileReader fr;
 		try {
 			fr = new FileReader("metadata.csv");
@@ -373,6 +440,12 @@ public class DBApp {
 			while((line = br.readLine()) != null){
 				String[] arr= line.split(",");
 				if((arr[0]).equals(strTableName)){
+					tableExist=true;
+			
+					if(colNames.contains(arr[1])){
+						colExist[colNames.indexOf(arr[1])]=true;
+					}
+
 					if(arr[3].equals("True")){
 						checktype=arr[2];
 					}
@@ -384,16 +457,34 @@ public class DBApp {
 						indexName.add(arr[4]);
 						indexColumn.add(arr[1]);
 					}
-					String type=colValues.get(index).getClass().getName();
-					if(!type.equals(arr[2])){
-						throw new DBAppException("Invalid input datatypes.");
+
+					try{
+						String type=colValues.get(index).getClass().getName();
+						if(!type.equals(arr[2])){
+							throw new DBAppException("Invalid input datatypes.");
+						}
 					}
+					catch(NullPointerException e){
+						throw new DBAppException("All columns should have a not null value.");
+					}
+
 				}
 			}
 			br.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+
+
+		if(!tableExist){
+			throw new DBAppException("Table does not exist.");
+		}
+
+		for(Boolean b:colExist){
+			if(b!=true){
+				throw new DBAppException("Column(s) does not exist.");
+			}
 		}
 
 		Table t=loadTableFromDisk(strTableName);
@@ -404,10 +495,13 @@ public class DBApp {
 		Object o=strClusteringKeyValue;
 		if(checktype.equals("java.lang.Integer")){
 			o=Integer.parseInt(strClusteringKeyValue);
-		}else if (checktype.equals("java.lang.Integer")){
+		}else if (checktype.equals("java.lang.Double")){
 			o=Double.parseDouble(strClusteringKeyValue);
 		}
 		target=BinaryPageSearch(t.getMinVector(), t.getMaxVector(), o);
+		if(target==-1){
+			throw new DBAppException("Clustering key value not found.");
+		}
 		Page p=t.loadPageFromFile(t.getPageNames().get(target));
 
 		Vector<Object> oldKeys=new Vector<>();
@@ -415,6 +509,9 @@ public class DBApp {
 
 		Vector<Object> v=p.getTuples();
 		int j=p.BinaryTupleSearch(ckey, o);
+		if(j==-1){
+			throw new DBAppException("Clustering key value not found.");
+		}
 		Hashtable<String,Object> ht=(Hashtable<String,Object>)v.elementAt(j);
 		for(String s:indexColumn){
 			oldKeys.add(ht.get(s));
@@ -442,13 +539,11 @@ public class DBApp {
 	// htblColNameValue enteries are ANDED together
 	public void deleteFromTable(String strTableName,
 								Hashtable<String,Object> htblColNameValue) throws DBAppException{
-		Table t=loadTableFromDisk(strTableName);
-		String ckey=t.cKey;
-		Vector<String> pages=t.getPageNames();
-		Page p=null;
-		Iterator<String> pItr=pages.iterator();
-		Iterator<Object> tItr;
+		
+		
+		Boolean tableExist=false;
 		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
+		Boolean[] colExist=new Boolean[colNames.size()];
 		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
 		Vector<String> indexName=new Vector<String>();
 		Vector<String> indexColumn=new Vector<String>();
@@ -463,6 +558,12 @@ public class DBApp {
 			while((line = br.readLine()) != null){
 				String[] arr= line.split(",");
 				if((arr[0]).equals(strTableName)){
+					tableExist=true;
+
+					if(colNames.contains(arr[1])){
+						colExist[colNames.indexOf(arr[1])]=true;
+					}
+
 					if(!arr[4].equals("null")){
 						allColName.add(arr[1]);
 						allIndexName.add(arr[4]);
@@ -475,6 +576,14 @@ public class DBApp {
 						indexName.add(arr[4]);
 						indexColumn.add(arr[1]);
 					}
+
+					int index=colNames.indexOf(arr[1]);
+					if(index!=-1){
+						String type=colValues.get(index).getClass().getName();
+						if(!type.equals(arr[2])){
+							throw new DBAppException("Invalid input datatypes.");
+						}
+					}
 				}
 			}
 			br.close();
@@ -482,8 +591,26 @@ public class DBApp {
 			e.printStackTrace();
 		}
 
+		if(!tableExist){
+			throw new DBAppException("Table does not exist.");
+		}
+
+		for(Boolean b:colExist){
+			if(b!=true){
+				throw new DBAppException("Column(s) does not exist.");
+			}
+		}
+		
+		
+
+		Table t=loadTableFromDisk(strTableName);
+		String ckey=t.cKey;
+		Vector<String> pages=t.getPageNames();
+		Page p=null;
+		Iterator<String> pItr=pages.iterator();
+		Iterator<Object> tItr;
+
 		if(allColName.containsAll(colNames)){
-			System.out.println("shaghal");
 			Set<Ref> intersection =null;
 			boolean first=true;
 			for(int i=0;i<indexName.size();i++){
@@ -527,36 +654,6 @@ public class DBApp {
 					saveTree(b, strTableName+allIndexName.get(j));
 				}
 
-				// for(int j=i+1;j<refs.size();j++){
-				// 	Ref r1=refs.get(j);
-				// 	String s1=r1.getPage();
-				// 	int index1=r1.getIndexInPage();
-				// 	if(s.equals(s1) && index1>index){
-				// 		refs.set(j, new Ref(s1, index1-1));
-				// 	}
-				// }
-
-
-				// p.remove(index);
-				// for(int j=i+1;j<refs.size();j++){
-				// 	Ref r1=refs.get(j);
-				// 	String s1=r1.getPage();
-				// 	int index1=r1.getIndexInPage();
-				// 	if(s.equals(s1) && index1>index){
-				// 		refs.set(j, new Ref(s1, index1-1));
-				// 	}
-				// }
-				// System.out.println("after refs: "+refs);
-				// t.setPageMax(t.pageNames.indexOf(p.getName()),((Hashtable)p.getLastTuple()).get(ckey));
-				// t.setPageMin(t.pageNames.indexOf(p.getName()),((Hashtable)p.getFirstTuple()).get(ckey));
-				
-
-				// if(p.isEmpty()){
-				// 	t.deletePage(p.getName());
-				// }
-				// else{
-				// 	t.savePageToFile(p);
-				// }
 			}
 			
 			for(int i=0;i<refs2.size();i++){
@@ -1081,7 +1178,7 @@ public class DBApp {
 			Hashtable htblColNameValue = new Hashtable( );
 			htblColNameValue.put("id", Integer.valueOf( 2343432 ));
 			htblColNameValue.put("name", new String("Ahmed Noor" ) );
-			htblColNameValue.put("gpa", Double.valueOf( 0.95 ) );
+			htblColNameValue.put("gpa", Double.valueOf( 1.5 ) );
 			dbApp.insertIntoTable( strTableName , htblColNameValue );
 
 			htblColNameValue.clear( );
@@ -1099,7 +1196,7 @@ public class DBApp {
 			htblColNameValue.clear( );
 			htblColNameValue.put("id",Integer.valueOf( 23498 ));
 			htblColNameValue.put("name", new String("John Noor" ) );
-			htblColNameValue.put("gpa", Double.valueOf( 1.5 ) );
+			htblColNameValue.put("gpa", Double.valueOf( 2 ) );
 			dbApp.insertIntoTable( strTableName , htblColNameValue );
 
 			htblColNameValue.clear( );
@@ -1110,6 +1207,8 @@ public class DBApp {
 
 			SQLTerm[] arrSQLTerms;
 			arrSQLTerms = new SQLTerm[2];
+			arrSQLTerms[0]=new SQLTerm();
+			arrSQLTerms[1]=new SQLTerm();
 			arrSQLTerms[0]._strTableName =  "Student";
 			arrSQLTerms[0]._strColumnName=  "name";
 			arrSQLTerms[0]._strOperator  =  "=";
@@ -1124,6 +1223,9 @@ public class DBApp {
 			strarrOperators[0] = "OR";
 			// select * from Student where name = "John Noor" or gpa = 1.5;
 			Iterator resultSet = dbApp.selectFromTable(arrSQLTerms , strarrOperators);
+			while(resultSet.hasNext()){
+				System.out.println(resultSet.next());
+			}
 		}
 		catch(Exception exp){
 			exp.printStackTrace( );
