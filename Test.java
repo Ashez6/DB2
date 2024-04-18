@@ -175,15 +175,20 @@ public class Test {
 				b=d.loadTree("CityNameTree");
 				System.out.println(t);
 				System.out.println(b);
-				
+				BPTree B2=d.loadTree("CityGPATree");
+				System.out.println(B2);
+
 				Hashtable tup9 = new Hashtable( );
-				tup9.put("name", new String("hazem" ) );
-				tup9.put("gpa", Double.valueOf( 2 ) );
+				// tup9.put("name", new String("hazem" ) );
+				 tup9.put("gpa", Double.valueOf( 2 ) );
+				tup9.put("id", 4 );
 				d.deleteFromTable("City", tup9);
 				t=d.loadTableFromDisk("City");
 				b=d.loadTree("CityNameTree");
+				B2=d.loadTree("CityGPATree");
 				System.out.println(t);
 				System.out.println(b);
+				System.out.println(B2);
 
 				System.out.println(b.searchDuplicates("Aby"));
 				System.out.println(b.searchDuplicates("bobs"));
@@ -192,6 +197,9 @@ public class Test {
 				System.out.println(b.searchDuplicates("sam"));
 				System.out.println(b.searchDuplicates("hazem"));
 				System.out.println(b.searchDuplicates("zeina"));
+				System.out.println(B2.searchDuplicates(0.95));
+				System.out.println(B2.searchDuplicates(1.0));
+				System.out.println(B2.searchDuplicates(2.0));
 
 
 			} catch ( DBAppException e) {

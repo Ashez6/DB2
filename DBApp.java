@@ -484,7 +484,7 @@ public class DBApp {
 
 		if(allColName.containsAll(colNames)){
 			System.out.println("shaghal");
-			Set<Ref> intersection = new HashSet<>();
+			Set<Ref> intersection =null;
 			boolean first=true;
 			for(int i=0;i<indexName.size();i++){
 				Object key=htblColNameValue.get(indexColumn.get(i));
@@ -492,7 +492,7 @@ public class DBApp {
 				ArrayList a=b.searchDuplicates((Comparable)key);
 				Set<Ref> set = new HashSet<>(a);
 				if(first){
-					intersection.addAll(set);
+					intersection=new HashSet<>(set);
 					first=false;
 				}
 				else{
@@ -500,12 +500,19 @@ public class DBApp {
 				}
 			}
 			Vector<Ref> refs= new Vector(intersection);
-			for(int i=0;i<refs.size();i++){
+			Vector<Ref> refs2= new Vector(intersection);
+			for(Ref r:refs){
+				r.setTableName(strTableName);
+			}
+			Collections.sort(refs);
+			System.out.println("first refs: "+refs);
+			for(int i=refs.size()-1;i>=0;i--){
 				Ref r=refs.get(i);
 				String s=r.getPage();
 				int index=r.getIndexInPage();
 				p=t.loadPageFromFile(s);
 				Hashtable ht=(Hashtable)p.getTuples().get(index);
+				//remove from all trees
 				for(int j=0;j<allColName.size();j++){
 					Object key=ht.get(allColName.get(j));
 					BPTree b=loadTree(strTableName+allIndexName.get(j));
@@ -514,17 +521,58 @@ public class DBApp {
 						oldrefs.add(new Ref(p.getName(), k));
 						newrefs.add(new Ref(p.getName(), k-1));
 					}
+					System.out.println("old refs: "+oldrefs);
+					System.out.println("new refs: "+newrefs);
 					b.updateRefNonKey(oldrefs, newrefs);
-					saveTree(b, allIndexName.get(j));
+					saveTree(b, strTableName+allIndexName.get(j));
 				}
+
+				// for(int j=i+1;j<refs.size();j++){
+				// 	Ref r1=refs.get(j);
+				// 	String s1=r1.getPage();
+				// 	int index1=r1.getIndexInPage();
+				// 	if(s.equals(s1) && index1>index){
+				// 		refs.set(j, new Ref(s1, index1-1));
+				// 	}
+				// }
+
+
+				// p.remove(index);
+				// for(int j=i+1;j<refs.size();j++){
+				// 	Ref r1=refs.get(j);
+				// 	String s1=r1.getPage();
+				// 	int index1=r1.getIndexInPage();
+				// 	if(s.equals(s1) && index1>index){
+				// 		refs.set(j, new Ref(s1, index1-1));
+				// 	}
+				// }
+				// System.out.println("after refs: "+refs);
+				// t.setPageMax(t.pageNames.indexOf(p.getName()),((Hashtable)p.getLastTuple()).get(ckey));
+				// t.setPageMin(t.pageNames.indexOf(p.getName()),((Hashtable)p.getFirstTuple()).get(ckey));
+				
+
+				// if(p.isEmpty()){
+				// 	t.deletePage(p.getName());
+				// }
+				// else{
+				// 	t.savePageToFile(p);
+				// }
 			}
-			System.out.println(refs);
-			for(int i=0;i<refs.size();i++){
-				Ref r=refs.get(i);
+			
+			for(int i=0;i<refs2.size();i++){
+				Ref r=refs2.get(i);
 				String s=r.getPage();
 				int index=r.getIndexInPage();
 				p=t.loadPageFromFile(s);
 				p.remove(index);
+				for(int j=i+1;j<refs2.size();j++){
+					Ref r1=refs2.get(j);
+					String s1=r1.getPage();
+					int index1=r1.getIndexInPage();
+					if(s.equals(s1) && index1>index){
+						refs2.set(j, new Ref(s1, index1-1));
+					}
+				}
 				t.setPageMax(t.pageNames.indexOf(p.getName()),((Hashtable)p.getLastTuple()).get(ckey));
 				t.setPageMin(t.pageNames.indexOf(p.getName()),((Hashtable)p.getFirstTuple()).get(ckey));
 				

@@ -12,6 +12,7 @@ public class Ref implements Comparable, Serializable {
 	private static final long serialVersionUID = 1L;
 	private int indexInPage;
 	private String pageName;
+	public String tablename;
 
 	public Ref(String pageName, int indexInPage) {
 		this.pageName = pageName;
@@ -53,8 +54,9 @@ public class Ref implements Comparable, Serializable {
 	@Override
 	public int compareTo(Object o) {
 		// TODO Auto-generated method stub
-		int p1=Integer.parseInt(pageName.substring(pageName.length()-6));
-		int p2=Integer.parseInt(((Ref)o).pageName.substring(pageName.length()-6));
+		System.out.println("byeeee");
+		int p1=Integer.parseInt(pageName.substring(tablename.length(),pageName.length()-6));
+		int p2=Integer.parseInt(((Ref)o).pageName.substring(tablename.length(),pageName.length()-6));
 		if(p1>p2){
 			return 1;
 		}else if(p1<p2){
@@ -70,6 +72,7 @@ public class Ref implements Comparable, Serializable {
 		}
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		// TODO Auto-generated method stub
 		if(pageName.equals(((Ref)o).pageName)){
@@ -78,5 +81,18 @@ public class Ref implements Comparable, Serializable {
 			}
 		}
 		return false;
+	}
+
+	public int hashCode() {
+		Integer i=indexInPage;
+		return pageName.hashCode()+i.hashCode();
+	}
+
+	public String getTableName(){
+		return tablename;
+	}
+
+	public void setTableName(String s){
+		this.tablename= s;
 	}
 }

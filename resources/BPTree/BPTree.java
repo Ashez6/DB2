@@ -116,7 +116,7 @@ public class BPTree<T extends Comparable<T>> implements Serializable {
 						min.setRecord(j, newRef);
 						oldRefs.remove(i);
 						newRefs.remove(i);
-						break;
+						//break;
 
 					} else if (min.getOverflow(j) != null && min.overflow.size() > 0) {
 						for (int k = 0; k < min.getOverflow(j).size(); k++) {
