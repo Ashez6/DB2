@@ -107,6 +107,9 @@ public class Page implements Serializable {
         int min=0;
         int mid;
         int res = -1;
+
+
+
         while(min<=max){
             mid=(max+min)/2;
             Hashtable tuple = (Hashtable) tuples.elementAt(mid);

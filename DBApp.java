@@ -201,7 +201,7 @@ public class DBApp {
             e.printStackTrace();
         }
 
-		BPTree b=null;
+		BPTree b;
 		switch(datatype){
 			case "java.lang.String": b=new BPTree<String>(n);
 			break;
@@ -324,8 +324,31 @@ public class DBApp {
 		int targetpage= BinaryPageSearch(t.getMinVector(), t.getMaxVector(), value);
 		Page p=t.loadPageFromFile(t.getPageNames().get(targetpage));
 		int index=p.getInsertLoc(ckey, value);
+
 		Vector<Object> pMin=t.getMinVector();
 		Vector<Object> pMax=t.getMaxVector();
+
+		Properties properties = new Properties();
+		int n=0;
+		try (FileInputStream input = new FileInputStream("resources/DBApp.config")) {
+			properties.load(input);
+			n = Integer.parseInt(properties.getProperty("MaximumRowsCountinPage"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		if (index == n){
+			t.createPage();
+			p=t.loadPageFromFile(t.getPageNames().lastElement());
+			p.insert(htblColNameValue);
+			pMin.add(value);
+			pMax.add(value);
+			t.setMinVector(pMin);
+			t.setMaxVector(pMax);
+			t.savePageToFile(p);
+			saveTableToDisk(t);
+			return new Ref(p.getName(),0);
+		}
 
 		if(!p.isFull()){
 			Vector<Object> v=p.getTuples();
@@ -932,9 +955,10 @@ public class DBApp {
 				
 					default: throw new DBAppException("Unsupported operator");
 				}
-				
+				System.out.println(refs);
 				for(Ref r:refs){
 					Page p=t.loadPageFromFile(r.getPage());
+
 					Hashtable ht=(Hashtable)p.getTuples().get(r.getIndexInPage());
 					results[i].add(ht);
 				}

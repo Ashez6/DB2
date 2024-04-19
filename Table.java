@@ -64,11 +64,21 @@ public class Table implements Serializable{
     }
     
     public void setPageMin(int page,Object value){
-        pageMin.set(page, value);
+        try{
+            pageMin.set(page, value);
+        }
+        catch ( ArrayIndexOutOfBoundsException arrayIndexOutOfBoundsException){
+            pageMin.insertElementAt(value, page);
+        }
     }
 
     public void setPageMax(int page,Object value){
-        pageMax.set(page, value);
+        try{
+            pageMax.set(page, value);
+        }
+        catch ( ArrayIndexOutOfBoundsException arrayIndexOutOfBoundsException){
+            pageMax.insertElementAt(value, page);
+        }
     }
     
 
@@ -78,8 +88,6 @@ public class Table implements Serializable{
         pageNames.add(pname);
         Page p=new Page(pname);
         savePageToFile(p);
-        pageMax.add(null);
-        pageMin.add(null);
     }
 
     public void deletePage(String s){
