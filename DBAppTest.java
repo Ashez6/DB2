@@ -418,9 +418,9 @@ public class DBAppTest {
         int counter = 0;
         for (int i = 0; i < table.getPageNames().size(); i++) {
             Page p = table.loadPageFromFile(table.getPageNames().get(i));
-            counter += p.getTuples().size(); 
+            counter += p.getTuples().size();
         }
-        assertEquals(99,counter); 
+        assertEquals(99,counter);
     }
 
     @Test
