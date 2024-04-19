@@ -346,23 +346,23 @@ public class DBApp {
 			}
 		}
 		else{
-			int currPage=targetpage;
-			boolean flag=false;
+			int currPage = targetpage;
+			boolean flag = false;
 			if(t.getPageNames().lastElement().equals(p.getName())){
 				t.createPage();
-				flag=true;
+				flag = true;
 			}
 			String tempName=t.getPageNames().get(++currPage);
 			Page tempPage=t.loadPageFromFile(tempName);
 			Object last=p.getLastTuple();
-			for(int i=index;i<p.getTuples().size();i++){
+			for(int i = index;i < p.getTuples().size();i++){
 				oldrefs.add(new Ref(p.getName(), i));
 			}
-			p.delete(last);
-			Vector<Object> v=p.getTuples();
+			Vector<Object> v = p.getTuples();
 		    v.insertElementAt(htblColNameValue, index);
-		    p.setTuples(v);
-			for(int i=index+1;i<p.getTuples().size();i++){
+			p.setTuples(v);
+			p.delete(last);
+			for(int i = index+1;i < p.getTuples().size();i++){
 				newrefs.add(new Ref(p.getName(), i));
 			}
 			newrefs.add(new Ref(tempName, 0));
@@ -377,10 +377,11 @@ public class DBApp {
 				for(int i=0;i<tempPage.getTuples().size();i++){
 					oldrefs.add(new Ref(tempPage.getName(), i));
 				}
-				tempPage.delete(last);
 				v=tempPage.getTuples();
 				v.insertElementAt(first, 0);
 				tempPage.setTuples(v);
+				tempPage.delete(last);
+
 				for(int i=1;i<tempPage.getTuples().size();i++){
 					newrefs.add(new Ref(tempPage.getName(), i));
 				}
@@ -452,7 +453,7 @@ public class DBApp {
 		Vector<String> indexName=new Vector<String>();
 		Vector<String> indexColumn=new Vector<String>();
 		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
-		Boolean[] colExist=new Boolean[colNames.size()];
+		boolean[] colExist=new boolean[colNames.size()];
 		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
 		String checktype=null;
 		boolean tableExist=false;
@@ -466,6 +467,8 @@ public class DBApp {
 				String[] arr= line.split(",");
 				if((arr[0]).equals(strTableName)){
 					tableExist=true;
+					if (colNames.contains(arr[1]) && arr[3].equals("True"))
+						throw new DBAppException("Clustering key should not be updated");
 			
 					if(colNames.contains(arr[1])){
 						colExist[colNames.indexOf(arr[1])]=true;
@@ -506,7 +509,7 @@ public class DBApp {
 			throw new DBAppException("Table does not exist.");
 		}
 
-		for(Boolean b:colExist){
+		for(boolean b:colExist){
 			if(b!=true){
 				throw new DBAppException("Column(s) does not exist.");
 			}
@@ -564,11 +567,10 @@ public class DBApp {
 	// htblColNameValue enteries are ANDED together
 	public void deleteFromTable(String strTableName,
 								Hashtable<String,Object> htblColNameValue) throws DBAppException{
-		
-		
-		Boolean tableExist=false;
+
+		boolean tableExist=false;
 		List<Object> colNames = Arrays.asList(htblColNameValue.keySet().toArray());
-		Boolean[] colExist=new Boolean[colNames.size()];
+		boolean[] colExist=new boolean[colNames.size()];
 		List<Object> colValues = Arrays.asList(htblColNameValue.values().toArray());
 		Vector<String> indexName=new Vector<String>();
 		Vector<String> indexColumn=new Vector<String>();
@@ -620,18 +622,26 @@ public class DBApp {
 			throw new DBAppException("Table does not exist.");
 		}
 
-		for(Boolean b:colExist){
-			if(b!=true){
+		for(boolean b:colExist){
+			if(!b){
 				throw new DBAppException("Column(s) does not exist.");
 			}
 		}
 		
-		
 
 		Table t=loadTableFromDisk(strTableName);
+
+		if(colNames.isEmpty()){
+			for (int i = 0; i < t.getPageNames().size(); i++)
+				t.deletePage(t.getPageNames().get(i));
+
+			t.NPages = 0;
+			saveTableToDisk(t);
+			return;
+		}
 		String ckey=t.cKey;
 		Vector<String> pages=t.getPageNames();
-		Page p=null;
+		Page p;
 		Iterator<String> pItr=pages.iterator();
 		Iterator<Object> tItr;
 
@@ -695,14 +705,14 @@ public class DBApp {
 						refs2.set(j, new Ref(s1, index1-1));
 					}
 				}
-				t.setPageMax(t.pageNames.indexOf(p.getName()),((Hashtable)p.getLastTuple()).get(ckey));
-				t.setPageMin(t.pageNames.indexOf(p.getName()),((Hashtable)p.getFirstTuple()).get(ckey));
-				
+
 
 				if(p.isEmpty()){
 					t.deletePage(p.getName());
 				}
 				else{
+					t.setPageMax(t.pageNames.indexOf(p.getName()),((Hashtable)p.getLastTuple()).get(ckey));
+					t.setPageMin(t.pageNames.indexOf(p.getName()),((Hashtable)p.getFirstTuple()).get(ckey));
 					t.savePageToFile(p);
 				}
 			}
@@ -745,13 +755,21 @@ public class DBApp {
 						del++;
 					}
 				}
+
 				p.setTuples(Tuples);
-				t.setPageMax(t.pageNames.indexOf(p.getName()),((Hashtable)p.getLastTuple()).get(ckey));
-				t.setPageMin(t.pageNames.indexOf(p.getName()),((Hashtable)p.getFirstTuple()).get(ckey));
+
 				if(p.isEmpty()){
-					t.deletePage(p.getName());
+					pItr.remove();
+					File file = new File(p.getName());
+					if (file.exists()) {
+						file.delete();
+					} else {
+						System.out.println("Page file not found: " + p.getName());
+					}
 				}
 				else{
+					t.setPageMax(t.pageNames.indexOf(p.getName()),((Hashtable)p.getLastTuple()).get(ckey));
+					t.setPageMin(t.pageNames.indexOf(p.getName()),((Hashtable)p.getFirstTuple()).get(ckey));
 					t.savePageToFile(p);
 				}
 		}

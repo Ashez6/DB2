@@ -129,16 +129,13 @@ public class Test {
 				//b.insert(2, b.insertRef(2,4,"City",false));
 				System.out.println(t);
 				System.out.println(b);
-				d.insertIntoTable("City", tup5);
-				t=d.loadTableFromDisk("City");
-				b=d.loadTree("CityNameTree");
-				//b.insert(5, b.insertRef(5,4,"City",false));
-				System.out.println(t);
-				System.out.println(b);
+
 
 				d.insertIntoTable("City", tup6a);
 				t=d.loadTableFromDisk("City");
 				b=d.loadTree("CityNameTree");
+
+
 				//Ref Rtup6 =  b.insertRef(6,4,"City",false);
 				//b.insert(6, Rtup6);
 				// System.out.println(t);
@@ -149,6 +146,15 @@ public class Test {
 				//b.insert(8, b.insertRef(8,4,"City",false));
 				System.out.println(t);
 				System.out.println(b);
+
+
+				d.insertIntoTable("City", tup5);
+				t=d.loadTableFromDisk("City");
+				b=d.loadTree("CityNameTree");
+				//b.insert(5, b.insertRef(5,4,"City",false));
+				System.out.println(t);
+				System.out.println(b);
+
 				d.createIndex("City", "gpa", "GPATree");
 				d.insertIntoTable("City", tup6b);
 				t=d.loadTableFromDisk("City");

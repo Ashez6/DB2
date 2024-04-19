@@ -83,7 +83,10 @@ public class Table implements Serializable{
     }
 
     public void deletePage(String s){
+        pageMin.remove(pageNames.indexOf(s));
+        pageMax.remove(pageNames.indexOf(s));
         pageNames.remove(s);
+
         File file = new File(s);
         if (file.exists()) {
             file.delete();
