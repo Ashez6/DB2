@@ -348,6 +348,10 @@ public class BPTree<T extends Comparable<T>> implements Serializable {
 		return false;
 	}
 
+	public BPTreeNode<T> getRoot() {
+		return root;
+	}
+
 	/**
 	 * Returns a string representation of the B+ tree.
 	 */
@@ -383,4 +387,5 @@ public class BPTree<T extends Comparable<T>> implements Serializable {
 		// </For Testing>
 		return s;
 	}
+
 }

@@ -12,12 +12,24 @@ import resources.BPTree.*;
 @SuppressWarnings({"rawtypes","unchecked"})
 public class DBApp {
 
+
+	ArrayList<String> myTables = new ArrayList<>();
+
 	ArrayList<Ref> oldrefs=new ArrayList<Ref>();
 	ArrayList<Ref> newrefs=new ArrayList<Ref>();
 
 	public DBApp( ){
 
 	}
+
+	public ArrayList<String> getMyTables() {
+		return myTables;
+	}
+
+	public void setMyTables(ArrayList<String> myTables) {
+		this.myTables = myTables;
+	}
+
 
 	// this does whatever initialization you would like
 	// or leave it empty if there is no code you want to
@@ -77,6 +89,8 @@ public class DBApp {
 		FileWriter csvFile;
 		try {
 			csvFile = new FileWriter("metadata.csv", true);
+
+			myTables.add(strTableName);
 
 			BufferedWriter bw = new BufferedWriter(csvFile);
 			Object[] colName =  htblColNameType.keySet().toArray();
@@ -263,6 +277,17 @@ public class DBApp {
 		if(colNames.size()!=len){
 			throw new DBAppException("Invalid column name.");
 		}
+		Table t = loadTableFromDisk(strTableName);
+
+		int num1, num2;
+		num1 = BinaryPageSearch(t.pageMin,t.pageMax, htblColNameValue.get(t.getCKey()));
+		if (num1 != -1){
+			Page p = t.loadPageFromFile(t.getPageNames().get(num1));
+			num2 = p.BinaryTupleSearch(t.getCKey(), htblColNameValue.get(t.getCKey()));
+			if (num2 != -1)
+				throw new DBAppException("identical primary key insertion");
+		}
+
 		Ref r=insertHelper(strTableName, htblColNameValue);
 		for(int i=0;i<indexName.size();i++){
 			BPTree b=loadTree(strTableName+indexName.get(i));
@@ -278,7 +303,7 @@ public class DBApp {
 		Hashtable<String,Object>  htblColNameValue){
 		
 		Table t = loadTableFromDisk(strTableName);
-		String ckey=t.getCKey();
+		String ckey =t.getCKey();
 		Object value=htblColNameValue.get(ckey);
 		
 		if(t.getNPages()==0){
@@ -752,6 +777,7 @@ public class DBApp {
 			results[i] = new Vector<>();
 			String indexName=null;
 			FileReader fr;
+			boolean columnExist = false;
 			try {
 				fr = new FileReader("metadata.csv");
 				BufferedReader br = new BufferedReader(fr);
@@ -759,6 +785,7 @@ public class DBApp {
 				while((line = br.readLine()) != null){
 					String[] arr= line.split(",");
 					if((arr[0]).equals(arrSQLTerms[i]._strTableName) && (arr[1]).equals(arrSQLTerms[i]._strColumnName)){
+						columnExist = true;
 						String type=arrSQLTerms[i]._objValue.getClass().getName();
 						if(!type.equals(arr[2])){
 							throw new DBAppException("Invalid search datatypes.");
@@ -766,12 +793,16 @@ public class DBApp {
 						if(!arr[4].equals("null")){
 							indexName=arr[4];
 						}
+
 						break;
 					}
 				}
 				br.close();
 			} catch (IOException e) {
 				e.printStackTrace();
+			}
+			if(!columnExist){
+				throw new DBAppException("The selected column does not exist");
 			}
 
 			Comparable key=(Comparable)arrSQLTerms[i]._objValue;
@@ -881,7 +912,7 @@ public class DBApp {
 						refs.addAll(b.searchDuplicates(key));
 						break;
 				
-					default: throw new DBAppException("Invalid operator");
+					default: throw new DBAppException("Unsupported operator");
 				}
 				
 				for(Ref r:refs){
@@ -928,7 +959,7 @@ public class DBApp {
 									results[i].add(ht);
 								break;
 						
-							default: throw new DBAppException("Invalid operator");
+							default: throw new DBAppException("Unsupported operator");
 						}
 
 
@@ -972,6 +1003,7 @@ public class DBApp {
 						output = new LinkedHashSet<>(differenceSet1);
 
 						break;
+					default: throw new DBAppException("The only supported logical operators are the AND, OR and XOR :(");
 				}
 			}
 		}
@@ -1063,6 +1095,8 @@ public class DBApp {
 				File metadata = new File("metadata.csv");
 				FileReader fr = new FileReader(metadata);
 				BufferedReader br = new BufferedReader(fr);
+
+				myTables.remove(s);
 
 				String line;
 				File tmpFile = null;

@@ -1,3 +1,5 @@
+import resources.BPTree.BPTree;
+
 import java.io.*;
 import java.util.*;
 
@@ -120,6 +122,47 @@ public class Table implements Serializable{
          i.printStackTrace();
          return;
       }
+    }
+
+    public ArrayList<BPTree> getBPTrees(){
+        ArrayList<BPTree> result = new ArrayList<>();
+
+        FileReader fr;
+        try {
+            fr = new FileReader("metadata.csv");
+            BufferedReader br = new BufferedReader(fr);
+            String line ;
+            while((line = br.readLine()) != null){
+                String[] arr= line.split(",");
+                if((arr[0]).equals(this.name)){
+
+                    if(!arr[4].equals("null")){
+                        result.add(loadTree(name + arr[4]));
+                    }
+                }
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public BPTree loadTree(String s){
+        BPTree t=null;
+        try {
+            FileInputStream fileIn = new FileInputStream(s+".class");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            t = (BPTree) in.readObject();
+            in.close();
+            fileIn.close();
+        } catch (IOException i) {
+            i.printStackTrace();
+        } catch (ClassNotFoundException c) {
+            System.out.println("Tree not found");
+            c.printStackTrace();
+        }
+        return t;
     }
 
     public String toString(){
