@@ -4,6 +4,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Vector;
@@ -101,21 +103,25 @@ public class BPTree<T extends Comparable<T>> implements Serializable {
 	 * updates the references of shifted keys
 	 */
 
-	public void updateRefNonKey(ArrayList<Ref> oldRefs, ArrayList<Ref> newRefs) {
+	public void updateInsertRefNonKey(ArrayList<Ref> oldRefs, ArrayList<Ref> newRefs) {
 		BPTreeLeafNode min = this.searchMinNode();
+		Collections.reverse(newRefs);
+		Collections.reverse(oldRefs);
 		while (min != null) {
 
 			for (int j = 0; j < min.numberOfKeys; j++) {
-				for (int i = 0; i < oldRefs.size(); i++) {
+				Iterator oldItr=oldRefs.iterator();
+				Iterator newItr=newRefs.iterator();
+				while(oldItr.hasNext()){
 					// for each leaf we will check if it is equal to one of the old ref,update if it
 					// does and remove
 					// old,new corresponding ref
-					Ref curRef = oldRefs.get(i);
-					Ref newRef = newRefs.get(i);
+					Ref curRef = (Ref)oldItr.next();
+					Ref newRef = (Ref)newItr.next();
 					if (min.getRecord(j).isEqual(curRef)) {
 						min.setRecord(j, newRef);
-						oldRefs.remove(i);
-						newRefs.remove(i);
+						oldItr.remove();
+						newItr.remove();
 						//break;
 
 					} else if (min.getOverflow(j) != null && min.overflow.size() > 0) {
@@ -123,8 +129,8 @@ public class BPTree<T extends Comparable<T>> implements Serializable {
 							if (((Ref) min.getOverflow(j).get(k)).isEqual(curRef)) {
 								min.getOverflow(j).remove(k);
 								min.getOverflow(j).add(k, newRef);
-								oldRefs.remove(i);
-								newRefs.remove(i);
+								oldItr.remove();
+								newItr.remove();
 								break;
 							}
 						}
@@ -133,6 +139,42 @@ public class BPTree<T extends Comparable<T>> implements Serializable {
 			}
 			min = min.getNext();
 		}
+	}
+
+		public void updateDeleteRefNonKey(ArrayList<Ref> oldRefs, ArrayList<Ref> newRefs) {
+			BPTreeLeafNode min = this.searchMinNode();
+			while (min != null) {
+	
+				for (int j = 0; j < min.numberOfKeys; j++) {
+					Iterator oldItr=oldRefs.iterator();
+					Iterator newItr=newRefs.iterator();
+					while(oldItr.hasNext()){
+						// for each leaf we will check if it is equal to one of the old ref,update if it
+						// does and remove
+						// old,new corresponding ref
+						Ref curRef = (Ref)oldItr.next();
+						Ref newRef = (Ref)newItr.next();
+						if (min.getRecord(j).isEqual(curRef)) {
+							min.setRecord(j, newRef);
+							oldItr.remove();
+							newItr.remove();
+							//break;
+	
+						} else if (min.getOverflow(j) != null && min.overflow.size() > 0) {
+							for (int k = 0; k < min.getOverflow(j).size(); k++) {
+								if (((Ref) min.getOverflow(j).get(k)).isEqual(curRef)) {
+									min.getOverflow(j).remove(k);
+									min.getOverflow(j).add(k, newRef);
+									oldItr.remove();
+									newItr.remove();
+									break;
+								}
+							}
+						}
+					}
+				}
+				min = min.getNext();
+			}
 
 	}
 

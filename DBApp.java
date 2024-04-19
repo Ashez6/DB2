@@ -289,9 +289,11 @@ public class DBApp {
 		}
 
 		Ref r=insertHelper(strTableName, htblColNameValue);
+		System.out.println(oldrefs);
+		System.out.println(newrefs);
 		for(int i=0;i<indexName.size();i++){
 			BPTree b=loadTree(strTableName+indexName.get(i));
-			b.updateRefNonKey(oldrefs, newrefs);
+			b.updateInsertRefNonKey(oldrefs, newrefs);
 			b.insert((Comparable)htblColNameValue.get(indexColumn.get(i)), r);
 			saveTree(b, strTableName+indexName.get(i));
 		}
@@ -708,7 +710,15 @@ public class DBApp {
 					}
 					System.out.println("old refs: "+oldrefs);
 					System.out.println("new refs: "+newrefs);
-					b.updateRefNonKey(oldrefs, newrefs);
+					b.updateDeleteRefNonKey(oldrefs, newrefs);
+					if(allColName.get(i).equals("name")){
+						System.out.println(b.searchDuplicates("Aby"));
+						System.out.println(b.searchDuplicates("bobs"));
+						System.out.println(b.searchDuplicates("ehab"));
+						System.out.println(b.searchDuplicates("hazem"));
+						System.out.println(b.searchDuplicates("sam"));
+						System.out.println(b.searchDuplicates("zeina"));
+					}
 					saveTree(b, strTableName+allIndexName.get(j));
 				}
 
@@ -765,11 +775,19 @@ public class DBApp {
 						for(int i=0;i<allColName.size();i++){
 							BPTree b=loadTree(strTableName+allIndexName.get(i));
 							b.delete((Comparable)ht.get(allColName.get(i)), new Ref(p.getName(),j-del));
-							for(int k=j+1;k<size;k++){
-								oldrefs.add(new Ref(p.getName(), k-del));
-								newrefs.add(new Ref(p.getName(), k-1-del));
+							for(int k=j-del+1;k<size;k++){
+								oldrefs.add(new Ref(p.getName(), k));
+								newrefs.add(new Ref(p.getName(), k-1));
 							}
-							b.updateRefNonKey(oldrefs, newrefs);
+							b.updateDeleteRefNonKey(oldrefs, newrefs);
+							if(allColName.get(i).equals("name")){
+								System.out.println(b.searchDuplicates("Aby"));
+								System.out.println(b.searchDuplicates("bobs"));
+								System.out.println(b.searchDuplicates("ehab"));
+								System.out.println(b.searchDuplicates("hazem"));
+								System.out.println(b.searchDuplicates("sam"));
+								System.out.println(b.searchDuplicates("zeina"));
+							}
 							saveTree(b, strTableName+allIndexName.get(i));
 						}
 						
