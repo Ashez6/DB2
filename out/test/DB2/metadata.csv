@@ -1,0 +1,3 @@
+aa878047838,gpa,java.lang.Double,False,gpaIndex,B+tree
+aa878047838,name,java.lang.String,False,null,null
+aa878047838,id,java.lang.Integer,True,null,null

@@ -51,7 +51,7 @@ public class DBApp {
 							String strClusteringKeyColumn,
 							Hashtable<String,String> htblColNameType)
 			throws DBAppException{
-		
+
 		File dupCheck = new File(strTableName+".class");
 		if(dupCheck.exists()){
 			throw new DBAppException("Table name already in use.");
@@ -60,7 +60,7 @@ public class DBApp {
 		Object[] arr=htblColNameType.values().toArray();
 		for(Object s:arr){
 			if(!s.toString().equals("java.lang.Integer") && !s.toString().equals("java.lang.Double")
-														 && !s.toString().equals("java.lang.String")){
+					&& !s.toString().equals("java.lang.String")){
 				throw new DBAppException("Invalid column datatype.");
 			}
 		}
@@ -117,7 +117,7 @@ public class DBApp {
 			throw new RuntimeException(e);
 		}
 
-		
+
 	}
 
 
@@ -125,18 +125,19 @@ public class DBApp {
 	public void createIndex(String   strTableName,
 							String   strColName,
 							String   strIndexName) throws DBAppException{
-		
+
 		boolean tableExist=false;
 		boolean columnExist=false;
+		String s="";
 
 		File mData = new File("metadata.csv");
 		String datatype="";
 		try {
-			File tmpFile = new File("tempFile.csv");
+			//File tmpFile = new File("tempFile.csv");
 			FileReader fr = new FileReader(mData);
 			BufferedReader br = new BufferedReader(fr);
-			FileWriter fw = new FileWriter(tmpFile);
-			BufferedWriter bw = new BufferedWriter(fw);
+			// FileWriter fw = new FileWriter("metadata.csv");
+			// BufferedWriter bw = new BufferedWriter(fw);
 
 			String line;
 			while((line = br.readLine()) != null){
@@ -146,7 +147,7 @@ public class DBApp {
 				if(lineValues[0].equals(strTableName)){
 					tableExist=true;
 				}
-				
+
 				if(lineValues[1].equals(strColName) && lineValues[0].equals(strTableName)){
 					columnExist=true;
 					if(!lineValues[4].equals("null")){
@@ -156,24 +157,30 @@ public class DBApp {
 					lineValues[5] = "B+tree";
 					datatype=lineValues[2];
 					String newLine = String.join(",", lineValues );
-					bw.write(newLine);
-					bw.newLine();
+					s+=newLine+"\n";
+
+					// bw.write(newLine);
+					// bw.newLine();
 				}
 				else {
-					bw.write(line);
-					bw.newLine();
+					s+=line+"\n";
+					// bw.write(line);
+					// bw.newLine();
 				}
 			}
+			FileWriter fw = new FileWriter("metadata.csv");
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(s);
 
 			br.close();
 			bw.close();
 
-			if(!mData.delete()){
-				throw new DBAppException("meta data not deleted");
-			}
-			if(!tmpFile.renameTo(mData)){
-				throw new DBAppException("temp file not renamed");
-			}
+			// if(!mData.delete()){
+			// 	throw new DBAppException("meta data not deleted");
+			// }
+			// if(!tmpFile.renameTo(mData)){
+			// 	throw new DBAppException("temp file not renamed");
+			// }
 
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -194,24 +201,24 @@ public class DBApp {
 
 		Properties properties = new Properties();
 		int n=0;
-        try (FileInputStream input = new FileInputStream("resources/DBApp.config")) {
-            properties.load(input);
-            n = Integer.parseInt(properties.getProperty("MaximumKeysinNode"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		try (FileInputStream input = new FileInputStream("resources/DBApp.config")) {
+			properties.load(input);
+			n = Integer.parseInt(properties.getProperty("MaximumKeysinNode"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		BPTree b;
 		switch(datatype){
 			case "java.lang.String": b=new BPTree<String>(n);
-			break;
+				break;
 			case "java.lang.Integer": b=new BPTree<Integer>(n);
-			break;
+				break;
 			case "java.lang.Double": b=new BPTree<Double>(n);
-			break;
+				break;
 			default: throw new DBAppException("Unsupported datatype.");
 		}
-		
+
 		Table t=loadTableFromDisk(strTableName);
 		for(String page:t.getPageNames()){
 			Page p=t.loadPageFromFile(page);
@@ -221,7 +228,7 @@ public class DBApp {
 			}
 		}
 		saveTree(b, strTableName+strIndexName);
-		
+
 
 	}
 
@@ -289,24 +296,25 @@ public class DBApp {
 		}
 
 		Ref r=insertHelper(strTableName, htblColNameValue);
-		
+		System.out.println(oldrefs);
+		System.out.println(newrefs);
 		for(int i=0;i<indexName.size();i++){
 			BPTree b=loadTree(strTableName+indexName.get(i));
 			b.updateInsertRefNonKey(oldrefs, newrefs);
 			b.insert((Comparable)htblColNameValue.get(indexColumn.get(i)), r);
 			saveTree(b, strTableName+indexName.get(i));
 		}
-		
+
 
 	}
 
 	public Ref insertHelper(String strTableName,
-		Hashtable<String,Object>  htblColNameValue){
-		
+							Hashtable<String,Object>  htblColNameValue){
+
 		Table t = loadTableFromDisk(strTableName);
 		String ckey =t.getCKey();
 		Object value=htblColNameValue.get(ckey);
-		
+
 		if(t.getNPages()==0){
 			t.createPage();
 			Page p=t.loadPageFromFile(t.getPageNames().lastElement());
@@ -356,8 +364,8 @@ public class DBApp {
 			for(int i=index;i<p.getTuples().size();i++){
 				oldrefs.add(new Ref(p.getName(), i));
 			}
-		    v.insertElementAt(htblColNameValue, index);
-		    p.setTuples(v);
+			v.insertElementAt(htblColNameValue, index);
+			p.setTuples(v);
 			for(int i=index+1;i<p.getTuples().size();i++){
 				newrefs.add(new Ref(p.getName(), i));
 			}
@@ -383,7 +391,7 @@ public class DBApp {
 				oldrefs.add(new Ref(p.getName(), i));
 			}
 			Vector<Object> v = p.getTuples();
-		    v.insertElementAt(htblColNameValue, index);
+			v.insertElementAt(htblColNameValue, index);
 			p.setTuples(v);
 			p.delete(last);
 			for(int i = index+1;i < p.getTuples().size();i++){
@@ -444,25 +452,25 @@ public class DBApp {
 	}
 
 	public int BinaryPageSearch(Vector<Object> pMin,Vector<Object> pMax,Object o){
-        int max=pMin.size()-1;
-        int min=0;
-        int mid;
-        while(min<=max){
+		int max=pMin.size()-1;
+		int min=0;
+		int mid;
+		while(min<=max){
 			if(min==max){
 				return min;
-			} 
-            mid=(max+min)/2;
-            Comparable low = (Comparable) pMin.elementAt(mid);
+			}
+			mid=(max+min)/2;
+			Comparable low = (Comparable) pMin.elementAt(mid);
 			Comparable high = (Comparable) pMax.elementAt(mid);
-            if((low).compareTo(o)<=0 && (high).compareTo(o)>=0)
-              return mid;
-            else if((low).compareTo(o)>0 )
-              max=mid-1;
-            else
-              min=mid+1;
-        }
-        return -1;
-    }
+			if((low).compareTo(o)<=0 && (high).compareTo(o)>=0)
+				return mid;
+			else if((low).compareTo(o)>0 )
+				max=mid-1;
+			else
+				min=mid+1;
+		}
+		return -1;
+	}
 
 
 
@@ -493,7 +501,7 @@ public class DBApp {
 					tableExist=true;
 					if (colNames.contains(arr[1]) && arr[3].equals("True"))
 						throw new DBAppException("Clustering key should not be updated");
-			
+
 					if(colNames.contains(arr[1])){
 						colExist[colNames.indexOf(arr[1])]=true;
 					}
@@ -541,7 +549,7 @@ public class DBApp {
 
 		Table t=loadTableFromDisk(strTableName);
 		String ckey=t.getCKey();
-		
+
 		//get target page
 		int target;
 		Object o=strClusteringKeyValue;
@@ -574,7 +582,7 @@ public class DBApp {
 		}
 		v.setElementAt(ht, j);
 		p.setTuples(v);
-		
+
 		t.savePageToFile(p);
 		for(int i=0;i<indexName.size();i++){
 			BPTree b=loadTree(strTableName+indexName.get(i));
@@ -600,7 +608,7 @@ public class DBApp {
 		Vector<String> indexColumn=new Vector<String>();
 		Vector<String> allColName=new Vector<String>();
 		Vector<String> allIndexName=new Vector<String>();
-		
+
 		FileReader fr;
 		try {
 			fr = new FileReader("metadata.csv");
@@ -651,7 +659,7 @@ public class DBApp {
 				throw new DBAppException("Column(s) does not exist.");
 			}
 		}
-		
+
 
 		Table t=loadTableFromDisk(strTableName);
 
@@ -707,14 +715,22 @@ public class DBApp {
 						oldrefs.add(new Ref(p.getName(), k));
 						newrefs.add(new Ref(p.getName(), k-1));
 					}
-					
+					System.out.println("old refs: "+oldrefs);
+					System.out.println("new refs: "+newrefs);
 					b.updateDeleteRefNonKey(oldrefs, newrefs);
-					
+					if(allColName.get(i).equals("name")){
+						System.out.println(b.searchDuplicates("Aby"));
+						System.out.println(b.searchDuplicates("bobs"));
+						System.out.println(b.searchDuplicates("ehab"));
+						System.out.println(b.searchDuplicates("hazem"));
+						System.out.println(b.searchDuplicates("sam"));
+						System.out.println(b.searchDuplicates("zeina"));
+					}
 					saveTree(b, strTableName+allIndexName.get(j));
 				}
 
 			}
-			
+
 			for(int i=0;i<refs2.size();i++){
 				Ref r=refs2.get(i);
 				String s=r.getPage();
@@ -771,10 +787,17 @@ public class DBApp {
 								newrefs.add(new Ref(p.getName(), k-1));
 							}
 							b.updateDeleteRefNonKey(oldrefs, newrefs);
-							
+							if(allColName.get(i).equals("name")){
+								System.out.println(b.searchDuplicates("Aby"));
+								System.out.println(b.searchDuplicates("bobs"));
+								System.out.println(b.searchDuplicates("ehab"));
+								System.out.println(b.searchDuplicates("hazem"));
+								System.out.println(b.searchDuplicates("sam"));
+								System.out.println(b.searchDuplicates("zeina"));
+							}
 							saveTree(b, strTableName+allIndexName.get(i));
 						}
-						
+
 						tItr.remove();
 						size--;
 						del++;
@@ -797,8 +820,8 @@ public class DBApp {
 					t.setPageMin(t.pageNames.indexOf(p.getName()),((Hashtable)p.getFirstTuple()).get(ckey));
 					t.savePageToFile(p);
 				}
-		}
-		
+			}
+
 		}
 		saveTableToDisk(t);
 	}
@@ -815,7 +838,7 @@ public class DBApp {
 
 		int nterms=arrSQLTerms.length;
 		Vector<Hashtable>[] results=new Vector[nterms];
-		
+
 		for(int i=0;i<nterms;i++){
 			results[i] = new Vector<>();
 			String indexName=null;
@@ -870,13 +893,13 @@ public class DBApp {
 						}
 						while(l!=null){
 							for (int j = 0; j < l.getNumberOfKeys(); j++) {
-									refs.add(l.getRecord(j));
+								refs.add(l.getRecord(j));
 								if(l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
 							}
 							l=l.getNext();
 						}
 						break;
-					
+
 					case ">=":
 						l=b.searchGreaterEqual(key);
 						if(l != null) {
@@ -890,13 +913,13 @@ public class DBApp {
 						}
 						while(l!=null){
 							for (int j = 0; j < l.getNumberOfKeys(); j++) {
-									refs.add(l.getRecord(j));
+								refs.add(l.getRecord(j));
 								if(l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
 							}
 							l=l.getNext();
 						}
 						break;
-					
+
 					case "<":
 						l=b.searchMinNode();
 						limit=b.searchGreaterEqual(key);
@@ -918,7 +941,7 @@ public class DBApp {
 							}
 						}
 						break;
-					
+
 					case "<=":
 						l=b.searchMinNode();
 						limit=b.searchGreaterthan(key);
@@ -926,7 +949,7 @@ public class DBApp {
 						if(limit != null){
 							while(!limit.equals(l)){
 								for (int j = 0; j < l.getNumberOfKeys(); j++) {
-										refs.add(l.getRecord(j));
+									refs.add(l.getRecord(j));
 									if(l.getOverflow(j) != null) refs.addAll(l.getOverflow(j));
 								}
 								l=l.getNext();
@@ -947,24 +970,24 @@ public class DBApp {
 								l=l.getNext();
 							}
 						}
-						
+
 
 						break;
 
 					case "=":
 						refs.addAll(b.searchDuplicates(key));
 						break;
-				
+
 					default: throw new DBAppException("Unsupported operator");
 				}
-				
+				System.out.println(refs);
 				for(Ref r:refs){
 					Page p=t.loadPageFromFile(r.getPage());
 
 					Hashtable ht=(Hashtable)p.getTuples().get(r.getIndexInPage());
 					results[i].add(ht);
 				}
-				
+
 			}
 			else{
 				for(String pname:t.pageNames){
@@ -977,32 +1000,32 @@ public class DBApp {
 								if(val.compareTo(key)>0)
 									results[i].add(ht);
 								break;
-							
+
 							case ">=":
 								if(val.compareTo(key)>=0)
 									results[i].add(ht);
 								break;
-							
+
 							case "<":
 								if(val.compareTo(key)<0)
 									results[i].add(ht);
 								break;
-							
+
 							case "<=":
 								if(val.compareTo(key)<=0)
 									results[i].add(ht);
 								break;
-		
+
 							case "=":
 								if(val.compareTo(key)==0)
 									results[i].add(ht);
 								break;
-							
+
 							case "!=":
 								if(val.compareTo(key)!=0)
 									results[i].add(ht);
 								break;
-						
+
 							default: throw new DBAppException("Unsupported operator");
 						}
 
@@ -1013,7 +1036,7 @@ public class DBApp {
 
 		}
 
-			LinkedHashSet<Hashtable> output = new LinkedHashSet<>(results[0]);
+		LinkedHashSet<Hashtable> output = new LinkedHashSet<>(results[0]);
 
 		if(strarrOperators != null) {
 			for (int i = 0; i < strarrOperators.length; i++) {
@@ -1051,13 +1074,13 @@ public class DBApp {
 				}
 			}
 		}
-			Iterator oi = output.iterator();
-			ArrayList<String> al = new ArrayList<>();
-			while(oi.hasNext()){
-				Tuple t = new Tuple((Hashtable) oi.next());
-				al.add(t.toString());
-			}
-		
+		Iterator oi = output.iterator();
+		ArrayList<String> al = new ArrayList<>();
+		while(oi.hasNext()){
+			Tuple t = new Tuple((Hashtable) oi.next());
+			al.add(t.toString());
+		}
+
 		return al.iterator();
 	}
 
@@ -1089,7 +1112,7 @@ public class DBApp {
 			}
 		}
 
-        return new LinkedHashSet<>(Arrays.asList(arr));
+		return new LinkedHashSet<>(Arrays.asList(arr));
 	}
 
 	public Table loadTableFromDisk(String s){
@@ -1134,7 +1157,7 @@ public class DBApp {
 			for(String name : temp){
 				t.deletePage(name);
 			}
-            file.delete();
+			file.delete();
 			try {
 				File metadata = new File("metadata.csv");
 				FileReader fr = new FileReader(metadata);
@@ -1143,25 +1166,25 @@ public class DBApp {
 				myTables.remove(s);
 
 				String line;
-				File tmpFile = null;
+				//File tmpFile = null;
 				while((line = br.readLine()) != null){
 					String[] lineValues = line.split(",");
 					if((lineValues[0]).equals(s)){
 						if(!lineValues[4].equals("null")){
 							trees.add(s+lineValues[4]+".class");
 						}
-						tmpFile = deleteLine(metadata, lineValues[0]);
+						deleteLine(metadata, lineValues[0]);
 					}
 				}
 				br.close();
 
 
-				if(!metadata.delete()){
-					throw new DBAppException("meta data not deleted");
-				}
-				if(!tmpFile.renameTo(metadata)){
-					throw new DBAppException("temp file not renamed");
-				}
+				// if(!metadata.delete()){
+				// 	throw new DBAppException("meta data not deleted");
+				// }
+				// if(!tmpFile.renameTo(metadata)){
+				// 	throw new DBAppException("temp file not renamed");
+				// }
 
 
 			} catch (IOException e) {
@@ -1213,13 +1236,13 @@ public class DBApp {
 
 
 	// helper method to delete lines
-	public File deleteLine(File f, String l) {
-		File tempFile = new File("myTempFile.csv");
+	public void deleteLine(File f, String l) {
+		//File tempFile = new File("myTempFile.csv");
+		String s="";
 
 		try {
 
 			BufferedReader reader = new BufferedReader(new FileReader(f));
-			BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 
 			String currentLine;
 
@@ -1227,13 +1250,17 @@ public class DBApp {
 				String[] lineValues2 = currentLine.split(",");
 
 				if ((lineValues2[0]).equals(l)) continue;
-				writer.write(currentLine);
-				writer.newLine();
+				s+=currentLine+"\n";
+				// writer.write(currentLine);
+				// writer.newLine();
 			}
 			reader.close();
+			BufferedWriter writer = new BufferedWriter(new FileWriter("metadata.csv"));
+			writer.write(s);
+
 			writer.close();
 
-			return tempFile;
+
 		}
 		catch (IOException e){
 			throw new RuntimeException();
