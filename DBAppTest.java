@@ -307,7 +307,7 @@ public class DBAppTest {
 
         // Then
         Table tito = engine.loadTableFromDisk(newTableName);
-        Page page = tito.loadPageFromFile(tito.getPageNames().get(1));
+        Page page = tito.loadPageFromFile(tito.getPageNames().get(0));
         Hashtable<String, Object> updated = (Hashtable<String, Object>) page.getTuples().get(0);
         assertEquals(updatedName,updated.get(name));
     }
