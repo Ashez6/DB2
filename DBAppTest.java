@@ -189,13 +189,10 @@ public class DBAppTest {
         assertEquals(3, table.getPageNames().size());
         Page page = table.loadPageFromFile(table.getPageNames().get(0));
 
-        System.out.println(page);
         assertEquals(399,((Hashtable) page.getTuples().get(199)).get(so));
         page = table.loadPageFromFile(table.getPageNames().get(1));
-        System.out.println(page);
         assertEquals(400,((Hashtable) page.getTuples().get(0)).get(so));
         page = table.loadPageFromFile(table.getPageNames().get(2));
-        System.out.println(page);
         assertEquals(800,((Hashtable) page.getTuples().get(0)).get(so));
     }
 
@@ -524,7 +521,7 @@ public class DBAppTest {
         });
 
         // Then
-        String expectedMessage = "There is an existing index on this column.";
+        String expectedMessage = "Index name already exists.";
         String outputMessage = exception.getMessage();
         assertEquals(expectedMessage, outputMessage);
 

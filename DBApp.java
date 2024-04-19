@@ -296,8 +296,7 @@ public class DBApp {
 		}
 
 		Ref r=insertHelper(strTableName, htblColNameValue);
-		System.out.println(oldrefs);
-		System.out.println(newrefs);
+
 		for(int i=0;i<indexName.size();i++){
 			BPTree b=loadTree(strTableName+indexName.get(i));
 			b.updateInsertRefNonKey(oldrefs, newrefs);
@@ -699,7 +698,7 @@ public class DBApp {
 				r.setTableName(strTableName);
 			}
 			Collections.sort(refs);
-			System.out.println("first refs: "+refs);
+
 			for(int i=refs.size()-1;i>=0;i--){
 				Ref r=refs.get(i);
 				String s=r.getPage();
@@ -715,17 +714,9 @@ public class DBApp {
 						oldrefs.add(new Ref(p.getName(), k));
 						newrefs.add(new Ref(p.getName(), k-1));
 					}
-					System.out.println("old refs: "+oldrefs);
-					System.out.println("new refs: "+newrefs);
+
 					b.updateDeleteRefNonKey(oldrefs, newrefs);
-					if(allColName.get(i).equals("name")){
-						System.out.println(b.searchDuplicates("Aby"));
-						System.out.println(b.searchDuplicates("bobs"));
-						System.out.println(b.searchDuplicates("ehab"));
-						System.out.println(b.searchDuplicates("hazem"));
-						System.out.println(b.searchDuplicates("sam"));
-						System.out.println(b.searchDuplicates("zeina"));
-					}
+
 					saveTree(b, strTableName+allIndexName.get(j));
 				}
 
@@ -787,14 +778,7 @@ public class DBApp {
 								newrefs.add(new Ref(p.getName(), k-1));
 							}
 							b.updateDeleteRefNonKey(oldrefs, newrefs);
-							if(allColName.get(i).equals("name")){
-								System.out.println(b.searchDuplicates("Aby"));
-								System.out.println(b.searchDuplicates("bobs"));
-								System.out.println(b.searchDuplicates("ehab"));
-								System.out.println(b.searchDuplicates("hazem"));
-								System.out.println(b.searchDuplicates("sam"));
-								System.out.println(b.searchDuplicates("zeina"));
-							}
+
 							saveTree(b, strTableName+allIndexName.get(i));
 						}
 
@@ -980,7 +964,7 @@ public class DBApp {
 
 					default: throw new DBAppException("Unsupported operator");
 				}
-				System.out.println(refs);
+
 				for(Ref r:refs){
 					Page p=t.loadPageFromFile(r.getPage());
 
