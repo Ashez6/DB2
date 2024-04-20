@@ -11,15 +11,14 @@ import resources.BPTree.*;
 
 @SuppressWarnings({"rawtypes","unchecked"})
 public class DBApp {
-
-
 	ArrayList<String> myTables = new ArrayList<>();
 
 	ArrayList<Ref> oldrefs=new ArrayList<Ref>();
 	ArrayList<Ref> newrefs=new ArrayList<Ref>();
+	public static  File f;
 
 	public DBApp( ){
-
+		init();
 	}
 
 	public ArrayList<String> getMyTables() {
@@ -35,8 +34,7 @@ public class DBApp {
 	// or leave it empty if there is no code you want to
 	// execute at application startup
 	public void init( ){
-
-
+		f = new File("metadata.csv");
 	}
 
 
@@ -88,7 +86,7 @@ public class DBApp {
 		// Writing to the CSV file
 		FileWriter csvFile;
 		try {
-			csvFile = new FileWriter("metadata.csv", true);
+			csvFile = new FileWriter(f, true);
 
 			myTables.add(strTableName);
 
@@ -130,11 +128,10 @@ public class DBApp {
 		boolean columnExist=false;
 		String s="";
 
-		File mData = new File("metadata.csv");
 		String datatype="";
 		try {
 			//File tmpFile = new File("tempFile.csv");
-			FileReader fr = new FileReader(mData);
+			FileReader fr = new FileReader(f);
 			BufferedReader br = new BufferedReader(fr);
 			// FileWriter fw = new FileWriter("metadata.csv");
 			// BufferedWriter bw = new BufferedWriter(fw);
@@ -168,7 +165,7 @@ public class DBApp {
 					// bw.newLine();
 				}
 			}
-			FileWriter fw = new FileWriter("metadata.csv");
+			FileWriter fw = new FileWriter(f);
 			BufferedWriter bw = new BufferedWriter(fw);
 			bw.write(s);
 
@@ -247,7 +244,7 @@ public class DBApp {
 
 		FileReader fr;
 		try {
-			fr = new FileReader("metadata.csv");
+			fr = new FileReader(f);
 			BufferedReader br = new BufferedReader(fr);
 			String line ;
 			while((line = br.readLine()) != null){
@@ -491,7 +488,7 @@ public class DBApp {
 
 		FileReader fr;
 		try {
-			fr = new FileReader("metadata.csv");
+			fr = new FileReader(f);
 			BufferedReader br = new BufferedReader(fr);
 			String line ;
 			while((line = br.readLine()) != null){
@@ -610,7 +607,7 @@ public class DBApp {
 
 		FileReader fr;
 		try {
-			fr = new FileReader("metadata.csv");
+			fr = new FileReader(f);
 			BufferedReader br = new BufferedReader(fr);
 			String line ;
 			while((line = br.readLine()) != null){
@@ -829,7 +826,7 @@ public class DBApp {
 			FileReader fr;
 			boolean columnExist = false;
 			try {
-				fr = new FileReader("metadata.csv");
+				fr = new FileReader(f);
 				BufferedReader br = new BufferedReader(fr);
 				String line ;
 				while((line = br.readLine()) != null){
@@ -1143,8 +1140,7 @@ public class DBApp {
 			}
 			file.delete();
 			try {
-				File metadata = new File("metadata.csv");
-				FileReader fr = new FileReader(metadata);
+				FileReader fr = new FileReader(f);
 				BufferedReader br = new BufferedReader(fr);
 
 				myTables.remove(s);
@@ -1157,7 +1153,7 @@ public class DBApp {
 						if(!lineValues[4].equals("null")){
 							trees.add(s+lineValues[4]+".class");
 						}
-						deleteLine(metadata, lineValues[0]);
+						deleteLine(lineValues[0]);
 					}
 				}
 				br.close();
@@ -1220,7 +1216,7 @@ public class DBApp {
 
 
 	// helper method to delete lines
-	public void deleteLine(File f, String l) {
+	public void deleteLine(String l) {
 		//File tempFile = new File("myTempFile.csv");
 		String s="";
 
@@ -1239,7 +1235,7 @@ public class DBApp {
 				// writer.newLine();
 			}
 			reader.close();
-			BufferedWriter writer = new BufferedWriter(new FileWriter("metadata.csv"));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(f));
 			writer.write(s);
 
 			writer.close();
