@@ -1,5 +1,5 @@
 # DB2
-This is a Database Engine developed from scratch using Java.
+A Database Engine developed from scratch using Java.
 
 The engine supports :
    -creation of tables
